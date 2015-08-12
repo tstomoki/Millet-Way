@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'road_condition_detector.bump_hunter',
 )
 
 MIDDLEWARE_CLASSES = (
