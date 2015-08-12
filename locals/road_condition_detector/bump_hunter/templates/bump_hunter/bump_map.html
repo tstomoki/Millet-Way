@@ -5,26 +5,72 @@
 {% block content %}
 <div class="container-fluid">
   <h3 class="page-header">Bump Map</h3>
-  <div style="margin: auto;">
-    <div id="bump-map"></div>
+  <div id="input-container">
+    <table align="center" cellspacing="15">
+      <tr>
+        <td>
+          <form id="geocoding_form" class="form-inline" method="post">
+            <div class="form-group">
+              <input type="text" class="form-control" id="address" placeholder="Address">
+            </div>
+            <button type="submit" class="btn btn-primary">Geocoarding</button>
+          </form>
+        </td>
+      </tr>
+    </table>
+
   </div>
+  <div id="bump-map"></div>        
 </div>
+
+
 <script>
- var map = new GMaps({
-   div: '#bump-map',
-   lat: 35.90061,
-   lng: 139.933694
- });
- map.addMarker({
-   lat: 35.90061,
-   lng: 139.933694,
-   title: 'Lima',
-   click: function(e) {
-     alert('clicked action');
-   },
-   infoWindow: {
-     content: '<p>HTML Content</p>'
-   }   
- }); 
+   $(document).ready(function(){
+       var map = new GMaps({
+         div: '#bump-map',
+         lat: 35.90061,
+         lng: 139.933694
+       });
+     map.addMarker({
+       lat: 35.90061,
+       lng: 139.933694,
+       title: 'Lima',
+       click: function(e) {
+         alert('clicked action');
+       },
+       infoWindow: {
+         content: '<p>HTML Content</p>'
+       }   
+     });
+     GMaps.geocode({
+       address: $('#address').val(),
+       callback: function(results, status) {
+         if (status == 'OK') {
+           var latlng = results[0].geometry.location;
+           map.setCenter(latlng.lat(), latlng.lng());
+           map.addMarker({
+             lat: latlng.lat(),
+             lng: latlng.lng()
+           });
+         }
+       }
+     });     
+     $('#geocoding_form').submit(function(e){
+       e.preventDefault();
+       GMaps.geocode({
+         address: $('#address').val().trim(),
+         callback: function(results, status){
+           if(status=='OK'){
+             var latlng = results[0].geometry.location;
+             map.setCenter(latlng.lat(), latlng.lng());
+             map.addMarker({
+               lat: latlng.lat(),
+               lng: latlng.lng()
+             });
+           }
+         }
+       });
+     });
+   });  
 </script>
 {% endblock content %}
