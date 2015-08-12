@@ -6,19 +6,18 @@
 <div class="container-fluid">
   <h3 class="page-header">Bump Map</h3>
   <div id="input-container">
-    <table align="center" cellspacing="15">
+    <table align="left">
       <tr>
         <td>
           <form id="geocoding_form" class="form-inline" method="post">
             <div class="form-group">
-              <input type="text" class="form-control" id="address" placeholder="Address">
+              <input type="text" class="form-control" id="address" placeholder="tokyo station">
             </div>
             <button type="submit" class="btn btn-primary">Geocoarding</button>
           </form>
         </td>
       </tr>
     </table>
-
   </div>
   <div id="bump-map"></div>        
 </div>
@@ -31,6 +30,8 @@
          lat: 35.90061,
          lng: 139.933694
        });
+     
+     // for marker
      map.addMarker({
        lat: 35.90061,
        lng: 139.933694,
@@ -42,6 +43,8 @@
          content: '<p>HTML Content</p>'
        }   
      });
+     
+     // geocoding     
      GMaps.geocode({
        address: $('#address').val(),
        callback: function(results, status) {
@@ -54,7 +57,7 @@
            });
          }
        }
-     });     
+     });
      $('#geocoding_form').submit(function(e){
        e.preventDefault();
        GMaps.geocode({

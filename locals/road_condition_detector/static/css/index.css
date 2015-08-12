@@ -1,5 +1,6 @@
 #input-container{
     width: 800px;
+    height: 50px;
     margin: auto;
     margin-bottom: 10px;
 }
@@ -7,4 +8,5 @@
     width: 800px;
     height: 800px;
     margin: auto;
+    margin-bottom: 100px;    
 }
