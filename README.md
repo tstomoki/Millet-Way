@@ -9,5 +9,15 @@
 ./
 ├── bluemix
 ├── locals
+│   └── road_condition_detector
+│       ├── bump_hunter
+│       │   ├── migrations
+│       │   └── templates
+│       │       └── bump_hunter
+│       ├── road_condition_detector
+│       └── static
+│           ├── css
+│           ├── fonts
+│           └── js
 └── materials
 ```
