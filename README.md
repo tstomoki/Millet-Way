@@ -5,13 +5,9 @@
 - materials
   その他資料等
 
------------------------------
+```
 ./
 ├── bluemix
 ├── locals
-│   └── road_condition_detector
-│       └── road_condition_detector
 └── materials
-
-5 directories
------------------------------
+```
