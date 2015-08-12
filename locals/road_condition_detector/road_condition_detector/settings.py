@@ -76,8 +76,12 @@ WSGI_APPLICATION = 'road_condition_detector.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'millet_project',
+        'USER': 'bluemix', # Not used with sqlite3.
+        'PASSWORD': 'millet', # Not used with sqlite3.
+        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.        
     }
 }
 
@@ -85,11 +89,11 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'utf-8'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tokyo'
 
-USE_I18N = True
+USE_I18N = False
 
 USE_L10N = True
 
