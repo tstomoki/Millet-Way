@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Bump Sensing{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+  <h3 class="page-header">Bump Sensing</h3>
+  <div>
+    <h4>Acceleration</h4>
+    <p>X: <span id="acc_x"></span> m/s^2</p>
+    <p>Y: <span id="acc_y"></span> m/s^2</p>
+    <p>Z: <span id="acc_z"></span> m/s^2</p>
+  </div>
+  <div>
+    <h4>Location</h4>
+    <p>Lat: <span id="lat"></span></p>
+    <p>Lon: <span id="lon"></span></p>
+  </div>
+</div>
+<script>
+    $(function() {
+        var time = new Date().getTime();
+
+        // acceleration
+        window.addEventListener('devicemotion', function(e) {
+            var ax = e.acceleration.x;
+            var ay = e.acceleration.y;
+            var az = e.acceleration.z;
+            $('#acc_x').text(ax);
+            $('#acc_y').text(ay);
+            $('#acc_z').text(az);
+        });
+
+        // location
+        if (navigator.geolocation) {
+            var options = {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000
+            };
+            navigator.geolocation.watchPosition(function(pos) {
+                var lat = pos.coords.latitude;
+                var lon = pos.coords.longitude;
+                $('#lat').text(lat);
+                $('#lon').text(lon);
+            }, function(err) {
+                console.warn('ERROR(' + err.code + '): ' + err.message);
+            }, options);
+        } else {
+            alert("Geolocation API is not supported.");
+        }
+    });
+</script>
+{% endblock content %}
