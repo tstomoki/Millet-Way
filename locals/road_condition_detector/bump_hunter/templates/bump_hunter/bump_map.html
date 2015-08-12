@@ -3,6 +3,15 @@
 {% block title %}Bump Map{% endblock title %}
 
 {% block content %}
-<h3 class="page-header">Bump Map</h3>
-
+<div class="container-fluid">
+  <h3 class="page-header">Bump Map</h3>
+  <div style="margin: auto;">
+    {{ form.map }}
+  </div>
+</div>
+<script>
+ $(function(){
+   $('#id_map').css('margin', 'auto');
+ });
+</script>
 {% endblock content %}
