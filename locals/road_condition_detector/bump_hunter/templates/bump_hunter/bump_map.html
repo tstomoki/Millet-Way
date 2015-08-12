@@ -6,7 +6,14 @@
 <div class="container-fluid">
   <h3 class="page-header">Bump Map</h3>
   <div style="margin: auto;">
-    a
+    <div id="bump-map"></div>
   </div>
 </div>
+<script>
+ var map = new GMaps({
+   div: '#bump-map',
+   lat: 35.90061,
+   lng: 139.933694
+ });
+</script>
 {% endblock content %}
