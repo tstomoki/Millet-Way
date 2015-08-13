@@ -1,0 +1,6 @@
+---
+applications:
+- name: bump_hunter
+  memory: 1024M
+  command: sh run.sh
+  buildpack: python_buildpack

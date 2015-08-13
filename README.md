@@ -16,6 +16,6 @@
 # Deployment
 ```
 cd locals/road_condition_detector
-cf push bump_hunter --no-manifest --no-start -b https://github.com/cloudfoundry/python-buildpack -c "sh run.sh"
+cf push --no-start
 cf start bump_hunter
 ```
