@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -75,21 +76,31 @@ WSGI_APPLICATION = 'road_condition_detector.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': 'millet_project',
-        # 'USER': 'bluemix', # Not used with sqlite3.
-        # 'PASSWORD': 'millet', # Not used with sqlite3.
-        # 'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
-        # 'PORT': '', # Set to empty string for default. Not used with sqlite3.
-        'NAME': 'ad_010097681c9762f',  # cleardb on bluemix
-        'USER': 'b2cf2575600801', # cleardb on bluemix
-        'PASSWORD': '289f5c1b', # cleardb on bluemix
-        'HOST': 'us-cdbr-iron-east-02.cleardb.net', # cleardb on bluemix
-        'PORT': '3306', # cleardb on bluemix
+if 'VCAP_SERVICES' in os.environ:
+    vcap_services = json.loads(os.environ['VCAP_SERVICES'])
+    cleardb = vcap_services['cleardb'][0]
+    cred = cleardb['credentials']
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': cred['name'],  # cleardb on bluemix
+            'USER': cred['username'], # cleardb on bluemix
+            'PASSWORD': cred['password'], # cleardb on bluemix
+            'HOST': cred['hostname'], # cleardb on bluemix
+            'PORT': cred['port'], # cleardb on bluemix
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'millet_project',
+            'USER': 'bluemix', # Not used with sqlite3.
+            'PASSWORD': 'millet', # Not used with sqlite3.
+            'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+            'PORT': '', # Set to empty string for default. Not used with sqlite3.
+        }
+    }
 
 
 # Internationalization
