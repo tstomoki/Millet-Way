@@ -125,3 +125,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
+
+# Authentification
+LOGIN_URL='/bump_hunter/login'
+
+LOGIN_REDIRECT_URL = '/bump_hunter/bump_map'
