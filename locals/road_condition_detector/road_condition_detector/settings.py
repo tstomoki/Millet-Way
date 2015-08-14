@@ -83,7 +83,7 @@ DATABASES = {
         'USER': 'bluemix', # Not used with sqlite3.
         'PASSWORD': 'millet', # Not used with sqlite3.
         'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '', # Set to empty string for default. Not used with sqlite3.        
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -109,3 +109,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
+
+# Authentification
+LOGIN_URL='/bump_hunter/login'
+
+LOGIN_REDIRECT_URL = '/bump_hunter/bump_map'
