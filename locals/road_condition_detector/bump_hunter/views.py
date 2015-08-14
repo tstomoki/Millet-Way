@@ -9,4 +9,4 @@ def bump_map(request):
                               context_instance=RequestContext(request))  # その他標準のコンテキスト
 
 def bump_sensing(request):
-    return render_to_response('bump_hunter/bump_sensing.html');
+    return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request));
