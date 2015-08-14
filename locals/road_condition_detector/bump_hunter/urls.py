@@ -6,5 +6,6 @@ from bump_hunter import views
 urlpatterns = patterns('',
     url(r'^bump_map/$', views.bump_map, name='bump_map'),
     url(r'^bump_sensing/$', views.bump_sensing, name='bump_sensing'),
-    url(r'^login/', django.contrib.auth.views.login, {'template_name': 'bump_hunter/login.html'}),
+    url(r'^bump_sensing/register/$', views.bump_sensing_register, name='bump_sensing_register'),
+    url(r'^login/$', django.contrib.auth.views.login, {'template_name': 'bump_hunter/login.html'}),
 )
