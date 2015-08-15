@@ -12,11 +12,33 @@ import json
 import logging
 import time
 import datetime
+import tweepy
+# Authentication Information for @bumps_hunter
+## https://twitter.com/bumps_hunter
+CONSUMER_KEY        = "QJhFqZOPE9xDRb90ZYUhCaHw2"
+CONSUMER_SECRET     = "YErkMoxOmXTmIwqb1QyOO2cP0ZwovXcJeOM9vgcMX7mJKt4MiJ"
+ACCESS_TOKEN        = "3315641186-dV9VB8PwJt5eCmyFuFrXrkNNVmYyTVDOXoXmbWx"
+ACCESS_TOKEN_SECRET = "Ou9LUOHjfyONE3jtFIoHuuMaqpNlVdzkyeWmmyxDDAgZV"
+
 
 logger = logging.getLogger(__name__)
 
 @login_required
 def bump_map(request):
+    return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート
+                              context_instance=RequestContext(request))  # その他標準のコンテキスト
+
+# tweet method
+@login_required
+def bump_tweet(request):
+    # Oauth authenticate
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+
+    # post tweet
+    api.update_status(status='Updating using OAuth authentication via Tweepy!')
+    
     return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート
                               context_instance=RequestContext(request))  # その他標準のコンテキスト
 
