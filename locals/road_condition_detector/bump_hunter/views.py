@@ -3,6 +3,7 @@ from django.shortcuts import render, render_to_response
 from django import forms
 from django.template import RequestContext
 from django.http import HttpResponse, JsonResponse, Http404
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
@@ -45,7 +46,7 @@ def bump_tweet(request):
     api = tweepy.API(auth)
     # watson
     watson_auth_token = LT_USERNAME,LT_PASSWORD
-    
+
     # process str [WIP]
     status_str = 'Hello'
     timestamp  = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -67,7 +68,7 @@ def bump_tweet(request):
         LT_str = LT_result_data['translations'][0]['translation']
         update_str = "%s (%s)" % (LT_str, timestamp)
         api.update_status(status=update_str)
-    
+
     return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート
                               context_instance=RequestContext(request))  # その他標準のコンテキスト
 
@@ -153,3 +154,7 @@ def bump_sensing_register(request):
 @login_required
 def bump_chart(request):
     return render_to_response('bump_hunter/bump_chart.html', context_instance=RequestContext(request));
+
+def logout(request):
+    logout(request)
+    render_to_response('bump_hunter/logout.html', context_instance=RequestContext(request))
