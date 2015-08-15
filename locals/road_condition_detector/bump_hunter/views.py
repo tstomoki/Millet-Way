@@ -12,6 +12,7 @@ import json
 import logging
 import time
 import datetime
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,20 @@ logger = logging.getLogger(__name__)
 def bump_map(request):
     return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート
                               context_instance=RequestContext(request))  # その他標準のコンテキスト
+
+@login_required
+def bump_map_get_all(request):
+    all_log_data = LogData.objects.all()
+    # logger.debug('all_log_data = %s' % all_log_data)
+    data_ary = []
+    for log_data in all_log_data:
+        log_dict = {}
+        log_dict['lat'] = float(log_data.lat)
+        log_dict['lon'] = float(log_data.lon)
+        log_dict['logged_at'] = log_data.logged_at
+        log_dict['acc'] = math.fabs(log_data.acc_x) + math.fabs(log_data.acc_y) + math.fabs(log_data.acc_z)
+        data_ary.append(log_dict)
+    return JsonResponse({'all_log_data': data_ary}, safe=False)
 
 @login_required
 def bump_sensing(request):
