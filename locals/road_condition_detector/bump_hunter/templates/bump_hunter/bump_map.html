@@ -37,6 +37,9 @@ var YELLOW_THRESH = 1.0;
 var RED_ICON_PATH = '/static/image/red-dot.png';
 var YELLOW_ICON_PATH = '/static/image/yellow-dot.png';
 var BLUE_ICON_PATH = '/static/image/blue-dot.png';
+var RED_DOT_ICON_PATH = '/static/image/small_dots/small-red-dot.png';
+var BLUE_DOT_ICON_PATH = '/static/image/small_dots/small-blue-dot.png';
+var YELLOW_DOT_ICON_PATH = '/static/image/small_dots/small-yellow-dot.png';
 
 $(document).ready(function(){
     var map = new GMaps({
@@ -87,11 +90,11 @@ $(document).ready(function(){
                 var data = response.all_log_data[i];
                 // console.log(data);
                 var acc = parseFloat(data.acc.toFixed(3));
-                var icon_path = BLUE_ICON_PATH;
+                var icon_path = BLUE_DOT_ICON_PATH;
                 if (acc > RED_THRESH) {
-                    icon_path = RED_ICON_PATH;
+                    icon_path = RED_DOT_ICON_PATH;
                 } else if (acc > YELLOW_THRESH) {
-                    icon_path = YELLOW_ICON_PATH;
+                    icon_path = YELLOW_DOT_ICON_PATH;
                 }
                 map.addMarker({
                     lat: data.lat,
