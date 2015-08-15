@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Bump Chart{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+  <h3 class="page-header">Bump Chart</h3>
+  <div id="chart" style="width: 900px; height: 500px"></div>
+</div>
+<script src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1','packages':['corechart']}]}"></script>
+<script>
+google.setOnLoadCallback(drawChart);
+
+function drawChart() {
+    $.ajax({
+        url: '../bump_map/get_all/',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            var data_ary = [['Time', 'Acceleration',],];
+            for (var i = 0; i < response.all_log_data.length; i++) {
+                var data = response.all_log_data[i];
+                data_ary.push([i, data.acc]);
+            }
+            var datatable = google.visualization.arrayToDataTable(data_ary);
+
+            var options = {
+                title: 'Acceleration',
+                // curveType: 'function',
+                legend: { position: 'bottom' }
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('chart'));
+
+            chart.draw(datatable, options);
+        },
+    });
+}
+</script>
+{% endblock content %}

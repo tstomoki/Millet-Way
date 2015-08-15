@@ -14,6 +14,8 @@ import time
 import datetime
 import requests
 import tweepy
+import math
+
 # Authentication Information for @bumps_hunter
 ## https://twitter.com/bumps_hunter
 CONSUMER_KEY        = "QJhFqZOPE9xDRb90ZYUhCaHw2"
@@ -70,6 +72,22 @@ def bump_tweet(request):
                               context_instance=RequestContext(request))  # その他標準のコンテキスト
 
 @login_required
+def bump_map_get_all(request):
+    all_log_data = LogData.objects.all()
+    # logger.debug('all_log_data = %s' % all_log_data)
+    data_ary = []
+    for log_data in all_log_data:
+        log_dict = {}
+        log_dict['lat'] = float(log_data.lat)
+        log_dict['lon'] = float(log_data.lon)
+        log_dict['logged_at'] = log_data.logged_at
+        log_dict['acc'] = math.fabs(log_data.acc_x) + math.fabs(log_data.acc_y) + math.fabs(log_data.acc_z)
+        # log_dict['user'] = unicode(log_data.user)
+        # logger.debug('log_data.user = %s' % log_data.user)
+        data_ary.append(log_dict)
+    return JsonResponse({'all_log_data': data_ary}, safe=False)
+
+@login_required
 def bump_sensing(request):
     return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request));
 
@@ -102,3 +120,7 @@ def bump_sensing_register(request):
         return JsonResponse({'count': count})
     else:
         raise Http404
+
+@login_required
+def bump_chart(request):
+    return render_to_response('bump_hunter/bump_chart.html', context_instance=RequestContext(request));
