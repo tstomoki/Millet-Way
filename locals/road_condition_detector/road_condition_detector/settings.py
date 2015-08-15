@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -76,16 +77,31 @@ WSGI_APPLICATION = 'road_condition_detector.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'millet_project',
-        'USER': 'bluemix', # Not used with sqlite3.
-        'PASSWORD': 'millet', # Not used with sqlite3.
-        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '', # Set to empty string for default. Not used with sqlite3.        
+if 'VCAP_SERVICES' in os.environ:
+    vcap_services = json.loads(os.environ['VCAP_SERVICES'])
+    cleardb = vcap_services['cleardb'][0]
+    cred = cleardb['credentials']
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': cred['name'],  # cleardb on bluemix
+            'USER': cred['username'], # cleardb on bluemix
+            'PASSWORD': cred['password'], # cleardb on bluemix
+            'HOST': cred['hostname'], # cleardb on bluemix
+            'PORT': cred['port'], # cleardb on bluemix
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'millet_project',
+            'USER': 'bluemix', # Not used with sqlite3.
+            'PASSWORD': 'millet', # Not used with sqlite3.
+            'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+            'PORT': '', # Set to empty string for default. Not used with sqlite3.
+        }
+    }
 
 
 # Internationalization
@@ -109,3 +125,42 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
+
+# Authentification
+
+LOGIN_URL='/bump_hunter/login'
+
+LOGIN_REDIRECT_URL = '/bump_hunter/bump_map'
+
+# Logging
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(asctime)s [%(levelname)s] %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'handlers': {
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+        'bump_hunter':{
+            'handlers': ['console',],
+            'level': 'DEBUG',
+        },
+    },
+}

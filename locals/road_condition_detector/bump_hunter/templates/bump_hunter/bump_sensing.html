@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Bump Sensing{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+  <h3 class="page-header">Bump Sensing</h3>
+  <div>
+    <h4>Acceleration</h4>
+    <p>X: <span id="acc_x"></span> m/s^2</p>
+    <p>Y: <span id="acc_y"></span> m/s^2</p>
+    <p>Z: <span id="acc_z"></span> m/s^2</p>
+  </div>
+  <div>
+    <h4>Location</h4>
+    <p>Lat: <span id="lat"></span></p>
+    <p>Lon: <span id="lon"></span></p>
+  </div>
+  <button id="register_btn" type="button" class="btn btn-default btn-block">Register Data</button>
+</div>
+<script>
+var MAX_LOG_DATA = 5000;
+
+// DEBUG
+// var logs = [
+//     {
+//         logged_at: 1439543510.385,
+//         lat: 35.8915585,
+//         lon: 139.9550587,
+//         acc_x: 0.1,
+//         acc_y: 0.2,
+//         acc_z: 0.3,
+//     },
+//     {
+//         logged_at: 1439543607.692,
+//         lat: 35.891550099999996,
+//         lon: 139.9549973,
+//         acc_x: -0.1,
+//         acc_y: 0.2,
+//         acc_z: -0.3,
+//     },
+// ];
+var logs = [];
+var lat = 0.0;
+var lon = 0.0;
+
+$(function() {
+    // acceleration
+    window.addEventListener('devicemotion', collectAcceleration);
+
+    // location
+    if (navigator.geolocation) {
+        var options = {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 5000
+        };
+        navigator.geolocation.watchPosition(function(pos) {
+            lat = pos.coords.latitude;
+            lon = pos.coords.longitude;
+            $('#lat').text(lat);
+            $('#lon').text(lon);
+        }, function(err) {
+            console.warn('ERROR(' + err.code + '): ' + err.message);
+        }, options);
+    } else {
+        alert("Geolocation API is not supported.");
+    }
+
+    // registeration
+    $('#register_btn').click(function() {
+        window.removeEventListener('devicemotion', collectAcceleration);
+
+        var json_str = JSON.stringify({logs: logs});
+        console.log(json_str);
+
+        $.ajax({
+            url: 'register/',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                log_json_str: json_str,
+            },
+            success: function(response) {
+                alert('Your log data (total = ' + response.count + ') were registered.');
+                console.log(response);
+            },
+        });
+    });
+});
+
+var collectAcceleration = function(e) {
+    var time = new Date().getTime() / 1000.0;
+
+    var ax = e.acceleration.x;
+    var ay = e.acceleration.y;
+    var az = e.acceleration.z;
+    $('#acc_x').text(ax);
+    $('#acc_y').text(ay);
+    $('#acc_z').text(az);
+
+    if (lat !== 0.0 || lon !== 0.0) {
+        var data = {
+            logged_at: time,
+            lat: lat,
+            lon: lon,
+            acc_x: ax,
+            acc_y: ay,
+            acc_z: az,
+        };
+
+        logs.push(data);
+    }
+
+    if (logs.length > MAX_LOG_DATA) {
+        window.removeEventListener('devicemotion', collectAcceleration);
+        alert(MAX_LOG_DATA + ' logs were collected. Stop collection.');
+    }
+};
+
+</script>
+{% endblock content %}
