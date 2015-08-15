@@ -22,11 +22,13 @@ function drawChart() {
         type: 'GET',
         dataType: 'json',
         success: function(response) {
+            console.log(response.all_log_data);
             var data_ary = [['Time', 'Acceleration',],];
             for (var i = 0; i < response.all_log_data.length; i++) {
                 var data = response.all_log_data[i];
-                data_ary.push([i, data.acc.toFixed(3)]);
+                data_ary.push([i, parseFloat(data.acc.toFixed(3))]);
             }
+            console.log(data_ary);
             var datatable = google.visualization.arrayToDataTable(data_ary);
 
             var options = {
