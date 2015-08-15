@@ -32,6 +32,8 @@ def bump_map_get_all(request):
         log_dict['lon'] = float(log_data.lon)
         log_dict['logged_at'] = log_data.logged_at
         log_dict['acc'] = math.fabs(log_data.acc_x) + math.fabs(log_data.acc_y) + math.fabs(log_data.acc_z)
+        # log_dict['user'] = unicode(log_data.user)
+        # logger.debug('log_data.user = %s' % log_data.user)
         data_ary.append(log_dict)
     return JsonResponse({'all_log_data': data_ary}, safe=False)
 
@@ -68,3 +70,7 @@ def bump_sensing_register(request):
         return JsonResponse({'count': count})
     else:
         raise Http404
+
+@login_required
+def bump_chart(request):
+    return render_to_response('bump_hunter/bump_chart.html', context_instance=RequestContext(request));
