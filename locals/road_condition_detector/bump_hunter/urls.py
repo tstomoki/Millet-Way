@@ -13,4 +13,5 @@ urlpatterns = patterns('',
                        url(r'^bump_sensing/register/$', views.bump_sensing_register, name='bump_sensing_register'),
                        url(r'^bump_chart/$', views.bump_chart, name='bump_chart'),
                        url(r'^login/$', django.contrib.auth.views.login, {'template_name': 'bump_hunter/login.html'}),
+                       url(r'^logout/$', django.contrib.auth.views.logout, {'template_name': 'bump_hunter/logout.html'}),
                    )

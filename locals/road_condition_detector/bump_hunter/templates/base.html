@@ -16,6 +16,27 @@
     {% block extrahead %}{% endblock %}
   </head>
   <body>
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/bump_hunter/bump_map/">Bump Hunter</a>
+        </div>
+        <div>
+          <ul class="nav navbar-nav">
+            <li><a href="/bump_hunter/bump_map/">Map</a></li>
+            <li><a href="/bump_hunter/bump_sensing/">Sensing</a></li>
+            <li><a href="/bump_hunter/bump_chart/">Chart</a></li>
+            <li><a href="/bump_hunter/bump_tweet/">Tweet</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            {% if user.is_authenticated %}
+            <li><a href="#"><span class="glyphicon glyphicon-user"></span> {{ user.get_username }}</a></li>
+            <li><a href="/bump_hunter/logout/"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
     <div class="container">
       {% block content %}
       {{ content }}
