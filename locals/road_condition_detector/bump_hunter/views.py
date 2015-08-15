@@ -12,12 +12,62 @@ import json
 import logging
 import time
 import datetime
+import requests
+import tweepy
 import math
+
+# Authentication Information for @bumps_hunter
+## https://twitter.com/bumps_hunter
+CONSUMER_KEY        = "QJhFqZOPE9xDRb90ZYUhCaHw2"
+CONSUMER_SECRET     = "YErkMoxOmXTmIwqb1QyOO2cP0ZwovXcJeOM9vgcMX7mJKt4MiJ"
+ACCESS_TOKEN        = "3315641186-dV9VB8PwJt5eCmyFuFrXrkNNVmYyTVDOXoXmbWx"
+ACCESS_TOKEN_SECRET = "Ou9LUOHjfyONE3jtFIoHuuMaqpNlVdzkyeWmmyxDDAgZV"
+
+# Language translation
+LT_USERNAME = "c4b210b4-094b-4a9c-b8c3-057c783932d9"
+LT_PASSWORD = "VOdojieHmsOw"
+LT_URL      = "https://gateway.watsonplatform.net/language-translation/api/v2"
 
 logger = logging.getLogger(__name__)
 
 @login_required
 def bump_map(request):
+    return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート
+                              context_instance=RequestContext(request))  # その他標準のコンテキスト
+
+# tweet method
+@login_required
+def bump_tweet(request):
+    # Oauth authenticate
+    ## twitter
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+    # watson
+    watson_auth_token = LT_USERNAME,LT_PASSWORD
+    
+    # process str [WIP]
+    status_str = 'Hello'
+    timestamp  = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    update_str = "%s (%s)" % (status_str, timestamp)
+
+    # post tweet
+    api.update_status(status=update_str)
+
+    # use LT api
+    url          = "%s/translate" % LT_URL
+    headers      = {'Content-type': 'application/json', 'Accept': 'application/json'}
+    request_data = { "model_id": "en-es",
+                     "text": status_str }
+    response     = requests.post(url, data=json.dumps(request_data), headers=headers, auth=watson_auth_token)
+
+    # update with tranlated string
+    if response.status_code == requests.codes.ok:
+        LT_result_data = json.loads(response.text)
+        LT_str = LT_result_data['translations'][0]['translation']
+        update_str = "%s (%s)" % (LT_str, timestamp)
+        api.update_status(status=update_str)
+    
     return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート
                               context_instance=RequestContext(request))  # その他標準のコンテキスト
 
