@@ -76,15 +76,44 @@ def bump_map_get_all(request):
     all_log_data = LogData.objects.all()
     # logger.debug('all_log_data = %s' % all_log_data)
     data_ary = []
-    for log_data in all_log_data:
-        log_dict = {}
-        log_dict['lat'] = float(log_data.lat)
-        log_dict['lon'] = float(log_data.lon)
-        log_dict['logged_at'] = log_data.logged_at
-        log_dict['acc'] = math.fabs(log_data.acc_x) + math.fabs(log_data.acc_y) + math.fabs(log_data.acc_z)
-        # log_dict['user'] = unicode(log_data.user)
-        # logger.debug('log_data.user = %s' % log_data.user)
+    cur = 0
+    next = 1
+    while cur < len(all_log_data) - 1:
+        cur_data = all_log_data[cur]
+        cur_lat = float(cur_data.lat)
+        cur_lon = float(cur_data.lon)
+        log_dict = {
+            'logged_at': cur_data.logged_at,
+            'lat': cur_lat,
+            'lon': cur_lon,
+        }
+        acc_sum = cur_data.get_acc_size()
+
+        count = 1
+        next_data = all_log_data[cur + count]
+        next_lat = float(next_data.lat)
+        next_lon = float(next_data.lon)
+        while cur + count < len(all_log_data) - 1 and cur_lat == next_lat and cur_lon == next_lon:
+            acc_sum += next_data.get_acc_size()
+            count += 1
+            next_data = all_log_data[cur + count]
+            next_lat = float(next_data.lat)
+            next_lon = float(next_data.lon)
+
+        cur += count + 1
+        log_dict['acc'] = acc_sum / count
         data_ary.append(log_dict)
+
+    # for log_data in all_log_data:
+    #     log_dict = {}
+    #     log_dict['lat'] = float(log_data.lat)
+    #     log_dict['lon'] = float(log_data.lon)
+    #     log_dict['logged_at'] = log_data.logged_at
+    #     log_dict['acc'] = math.sqrt(math.pow(log_data.acc_x, 2) + math.sqrt(log_data.acc_y, 2) + math.pow(log_data.acc_z, 2))
+    #     # log_dict['user'] = unicode(log_data.user)
+    #     # logger.debug('log_data.user = %s' % log_data.user)
+    #     data_ary.append(log_dict)
+
     return JsonResponse({'all_log_data': data_ary}, safe=False)
 
 @login_required

@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+import math
+
 # class User(models.Model):
 #     name       = models.CharField(max_length=200)
 #     password   = models.CharField(max_length=200)
@@ -21,3 +23,6 @@ class LogData(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     def __unicode__(self):
         return "log data at %s" % self.logged_at.strftime('%Y/%m/%d')
+
+    def get_acc_size(self):
+        return math.sqrt(math.pow(self.acc_x, 2) + math.pow(self.acc_y, 2) + math.pow(self.acc_z, 2))
