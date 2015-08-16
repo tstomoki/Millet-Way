@@ -47,6 +47,19 @@ $(document).ready(function(){
         lat: 35.90061,
         lng: 139.933694
     });
+  GMaps.geolocate({
+    success: function(position) {
+      map.setCenter(position.coords.latitude, position.coords.longitude);
+    },
+    error: function(error) {
+      alert('Geolocation failed: '+error.message);
+    },
+    not_supported: function() {
+      alert("Your browser does not support geolocation");
+    },
+    always: function() {
+    }
+  });  
 
     // geocoding
     GMaps.geocode({
@@ -79,20 +92,6 @@ $(document).ready(function(){
         });
     });
 
-  GMaps.geolocate({
-    success: function(position) {
-      map.setCenter(position.coords.latitude, position.coords.longitude);
-    },
-    error: function(error) {
-      alert('Geolocation failed: '+error.message);
-    },
-    not_supported: function() {
-      alert("Your browser does not support geolocation");
-    },
-    always: function() {
-    }
-  });
-  
   // twitter insights
   $.ajax({
     url: '/bump_hunter/bump_tweet/',
@@ -120,7 +119,7 @@ $(document).ready(function(){
                     },
                     infoWindow: {
                         // content: '<p>user: ' + data.user + '</p><p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
-                      content: '<p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
+                      content: '<p>averaged acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
                     },
                 });            
             }          

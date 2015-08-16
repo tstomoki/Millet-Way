@@ -139,10 +139,11 @@ def bump_map_get_all(request):
                     pre_label = log_label
                 if (pre_label is not None) and len(consective_ary) > 10:
                     base_data = consective_ary[len(consective_ary)/2]
+                    acc_list = [_c['acc'] for _c in consective_ary]
                     markers_dict = {
                         'lat': base_data['lat'],
                         'lon': base_data['lon'],
-                        'acc': base_data['acc']
+                        'acc': reduce(lambda x, y: x + y, acc_list) / len(acc_list)
                     }
                     markers_ary.append(markers_dict)
                     pre_label       = None
