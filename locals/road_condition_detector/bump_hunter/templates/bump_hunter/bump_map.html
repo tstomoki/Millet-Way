@@ -84,8 +84,9 @@ $(document).ready(function(){
                     var latlng = results[0].geometry.location;
                     map.setCenter(latlng.lat(), latlng.lng());
                     map.addMarker({
-                        lat: latlng.lat(),
-                        lng: latlng.lng()
+                      lat: latlng.lat(),
+                      lng: latlng.lng(),
+                      icon: BLUE_ICON_PATH,
                     });
                 }
             }
@@ -109,7 +110,7 @@ $(document).ready(function(){
         success: function(response) {
           for (var i = 0; i < response.markers.length; i++) {
             var data = response.markers[i];
-                console.log(data);
+                // console.log(data);
                 map.addMarker({
                     lat: data.lat,
                     lng: data.lon,
@@ -119,7 +120,7 @@ $(document).ready(function(){
                     },
                     infoWindow: {
                         // content: '<p>user: ' + data.user + '</p><p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
-                      content: '<p>averaged acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
+                      content: '<p>Averaged Acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
                     },
                 });            
             }          
