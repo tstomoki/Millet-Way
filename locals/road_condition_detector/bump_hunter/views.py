@@ -119,7 +119,11 @@ def bump_map_get_all(request):
 
 @login_required
 def bump_sensing(request):
-    return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request));
+    return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request))
+
+@login_required
+def bump_mqtt(request):
+    return render_to_response('bump_hunter/bump_mqtt.html', context_instance=RequestContext(request))
 
 @login_required
 def bump_sensing_register(request):
