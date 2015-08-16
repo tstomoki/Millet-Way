@@ -79,6 +79,29 @@ $(document).ready(function(){
         });
     });
 
+  GMaps.geolocate({
+    success: function(position) {
+      map.setCenter(position.coords.latitude, position.coords.longitude);
+    },
+    error: function(error) {
+      alert('Geolocation failed: '+error.message);
+    },
+    not_supported: function() {
+      alert("Your browser does not support geolocation");
+    },
+    always: function() {
+    }
+  });
+  
+  // twitter insights
+  $.ajax({
+    url: '/bump_hunter/bump_tweet/',
+    type: 'GET',
+    dataType: 'json',
+    success: function(response) {
+    }
+  });    
+  
     // visualization of log data
     $.ajax({
         url: 'get_all/',
