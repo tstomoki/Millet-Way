@@ -29,6 +29,11 @@ LT_USERNAME = "c4b210b4-094b-4a9c-b8c3-057c783932d9"
 LT_PASSWORD = "VOdojieHmsOw"
 LT_URL      = "https://gateway.watsonplatform.net/language-translation/api/v2"
 
+# Twitter insights
+TI_USERNAME = "cb0cb3b64354350db2024dfca30e493a"
+TI_PASSWORD = "TBOhrFxT4z"
+TI_URL      = "https://cb0cb3b64354350db2024dfca30e493a:TBOhrFxT4z@cdeservice.mybluemix.net"
+
 logger = logging.getLogger(__name__)
 
 @login_required
