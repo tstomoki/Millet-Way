@@ -43,7 +43,7 @@ $(function() {
         $('#acc_y').text(ay);
         $('#acc_z').text(az);
 
-        publish();
+        // publish();
     };
 
     // location
@@ -59,7 +59,7 @@ $(function() {
             $('#lat').text(lat);
             $('#lon').text(lon);
 
-            publish(); // DEBUG
+            // publish(); // DEBUG
         }, function(err) {
             console.warn('ERROR(' + err.code + '): ' + err.message);
         }, options);
@@ -70,7 +70,7 @@ $(function() {
     // navbar
     $('#nav_mqtt').addClass('active');
 
-    // setInterval(publish, 100);
+    setInterval(publish, 1000);
 });
 
 var connectDevice = function(client) {
@@ -96,7 +96,7 @@ var publish = function() {
                 'lat': lat,
                 'lon': lon,
                 'logged_at': time,
-                'user_id': {{ user.id }}
+                'user_id': {{ user.id }},
             }
         };
 

@@ -16,6 +16,8 @@ import datetime
 import requests
 import tweepy
 import math
+import ibmiotf.application
+import uuid
 
 # Authentication Information for @bumps_hunter
 ## https://twitter.com/bumps_hunter
@@ -28,6 +30,16 @@ ACCESS_TOKEN_SECRET = "Ou9LUOHjfyONE3jtFIoHuuMaqpNlVdzkyeWmmyxDDAgZV"
 LT_USERNAME = "c4b210b4-094b-4a9c-b8c3-057c783932d9"
 LT_PASSWORD = "VOdojieHmsOw"
 LT_URL      = "https://gateway.watsonplatform.net/language-translation/api/v2"
+
+# MQTT
+ORG_ID = 'g6t2bu'
+DEVICE_TYPE = 'MQTTDevice'
+DEVICE_ID = 'DQGM50ADF8GJ'
+AUTH_TOKEN = ')l3k_j(h(tR4penx3g'
+
+AUTH_METHOD = 'apikey'
+API_KEY = 'a-g6t2bu-0lsj9vg8gt'
+API_TOKEN = 'YKLe&MtjSvd*FbXYpM'
 
 logger = logging.getLogger(__name__)
 
@@ -123,6 +135,41 @@ def bump_sensing(request):
 
 @login_required
 def bump_mqtt(request):
+    mqtt_options = {
+        'org': ORG_ID,
+        'id': str(uuid.uuid4()),
+        'auth-method': AUTH_METHOD,
+        'auth-key': API_KEY,
+        'auth-token': API_TOKEN,
+    }
+
+    def myEventCallback(event):
+        log = event.data
+        logger.debug('log = %s' % log)
+        user = User.objects.get(pk=log['user_id'])
+        logger.debug('user = %s' % user)
+        logged_at = datetime.datetime.fromtimestamp(log['logged_at'])
+
+        log_data = LogData(
+            lat=log['lat'],
+            lon=log['lon'],
+            acc_x=log['acc_x'],
+            acc_y=log['acc_y'],
+            acc_z=log['acc_z'],
+            logged_at=logged_at,
+            user=user,
+        )
+        logger.debug('log_data = %s' % log_data)
+
+        log_data.save()
+
+    try:
+        client = ibmiotf.application.Client(mqtt_options)
+        client.connect()
+        client.deviceEventCallback = myEventCallback
+        client.subscribeToDeviceEvents(DEVICE_TYPE, DEVICE_ID, "+")
+    except ibmiotf.ConnectionException as e:
+        logger.error('Connection failed: %s' % e)
     return render_to_response('bump_hunter/bump_mqtt.html', context_instance=RequestContext(request))
 
 @login_required
