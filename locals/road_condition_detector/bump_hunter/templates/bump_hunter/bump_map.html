@@ -123,7 +123,7 @@ $(document).ready(function(){
                         // alert('clicked action');
                     },
                     infoWindow: {
-                      content: '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Averaged Acc: </td><td>' + data.acc.toFixed(3) + '[m/s^2]</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr></table><div style="margin: 10px;"><img src="{{ STATIC_URL }}image/dummy_images/dummy' + image_index + '.png" style="width: 300px; height 200px;"/ ></div>'
+                      content: '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Averaged Acc: </td><td>' + data.acc.toFixed(3) + '[m/s^2]</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr></table><div style="margin: 10px;"><a href="http://maps.google.com/?cbll=' + data.lat + ',' + data.lon + '&layer=c" target="_blank"><img src="{{ STATIC_URL }}image/dummy_images/dummy' + image_index + '.png" style="width: 300px; height 200px;"/ ></a></div>'
                     },
                 });            
             }          
