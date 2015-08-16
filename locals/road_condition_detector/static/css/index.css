@@ -41,3 +41,10 @@
     color: #fff;
     z-index: 2;
 }
+
+.navbar-brand {
+  background: url("/static/image/logo.png") no-repeat left center;
+  background-size: contain;
+  height: 50px;
+  width: 140px;
+}
