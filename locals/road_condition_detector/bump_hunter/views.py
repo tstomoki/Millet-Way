@@ -31,6 +31,11 @@ LT_USERNAME = "c4b210b4-094b-4a9c-b8c3-057c783932d9"
 LT_PASSWORD = "VOdojieHmsOw"
 LT_URL      = "https://gateway.watsonplatform.net/language-translation/api/v2"
 
+# Twitter insights
+TI_USERNAME = "cb0cb3b64354350db2024dfca30e493a"
+TI_PASSWORD = "TBOhrFxT4z"
+TI_URL      = "https://cb0cb3b64354350db2024dfca30e493a:TBOhrFxT4z@cdeservice.mybluemix.net"
+RED_THRESH = 2.0
 # MQTT
 ORG_ID = 'g6t2bu'
 DEVICE_TYPE = 'MQTTDevice'
@@ -48,6 +53,24 @@ def bump_map(request):
     return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート
                               context_instance=RequestContext(request))  # その他標準のコンテキスト
 
+# twitter insights
+@login_required
+def bump_map_get_tweets(request):
+    # use TI api
+    url          = "%s/search" % TI_URL
+    headers      = {'Content-type': 'application/json', 'Accept': 'application/json'}
+    query = ""
+    request_data = { "q": query,
+                     "size": 1 }
+    response     = requests.get(url, data=json.dumps(request_data), headers=headers, auth=watson_auth_token)
+
+    # update with tranlated string
+    if response.status_code == requests.codes.ok:
+        LT_result_data = json.loads(response.text)
+        LT_str = LT_result_data['translations'][0]['translation']
+        update_str = "%s (%s)" % (LT_str, timestamp)    
+    return JsonResponse({'all_log_data': data_ary, 'markers': markers_ary}, safe=False)
+
 # tweet method
 @login_required
 def bump_tweet(request):
@@ -59,8 +82,8 @@ def bump_tweet(request):
     # watson
     watson_auth_token = LT_USERNAME,LT_PASSWORD
 
-    # process str [WIP]
-    status_str = 'Hello'
+    # process str
+    status_str = 'Hello. This is the latest infomation of load condition around your area! Check http://bump-hunter.mybluemix.net/bump_hunter'
     timestamp  = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     update_str = "%s (%s)" % (status_str, timestamp)
 
@@ -88,9 +111,12 @@ def bump_tweet(request):
 def bump_map_get_all(request):
     all_log_data = LogData.objects.all()
     # logger.debug('all_log_data = %s' % all_log_data)
-    data_ary = []
-    cur = 0
-    next = 1
+    data_ary       = []
+    cur            = 0
+    next           = 1
+    pre_label      = None
+    consective_ary = []
+    markers_ary    = []
     while cur < len(all_log_data) - 1:
         cur_data = all_log_data[cur]
         cur_lat = float(cur_data.lat)
@@ -112,11 +138,29 @@ def bump_map_get_all(request):
             next_data = all_log_data[cur + count]
             next_lat = float(next_data.lat)
             next_lon = float(next_data.lon)
-
         cur += count + 1
         log_dict['acc'] = acc_sum / count
+        log_label = 'red' if (log_dict['acc'] > RED_THRESH) else None
+        if (pre_label is not None) or (log_label is not None):
+            if (log_label is not None) and (pre_label is not None):
+                consective_ary.append(log_dict)
+            else:
+                if log_label is not None:
+                    consective_ary.append(log_dict)
+                    pre_label = log_label
+                if (pre_label is not None) and len(consective_ary) > 10:
+                    base_data = consective_ary[len(consective_ary)/2]
+                    acc_list = [_c['acc'] for _c in consective_ary]
+                    markers_dict = {
+                        'lat': base_data['lat'],
+                        'lon': base_data['lon'],
+                        'acc': reduce(lambda x, y: x + y, acc_list) / len(acc_list)
+                    }
+                    markers_ary.append(markers_dict)
+                    pre_label       = None
+                    log_label       = None
+                    consective_ary  = []
         data_ary.append(log_dict)
-
     # for log_data in all_log_data:
     #     log_dict = {}
     #     log_dict['lat'] = float(log_data.lat)
@@ -126,8 +170,7 @@ def bump_map_get_all(request):
     #     # log_dict['user'] = unicode(log_data.user)
     #     # logger.debug('log_data.user = %s' % log_data.user)
     #     data_ary.append(log_dict)
-
-    return JsonResponse({'all_log_data': data_ary}, safe=False)
+    return JsonResponse({'all_log_data': data_ary, 'markers': markers_ary}, safe=False)
 
 @login_required
 def bump_sensing(request):
