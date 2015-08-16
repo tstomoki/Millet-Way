@@ -16,6 +16,8 @@ import datetime
 import requests
 import tweepy
 import math
+import ibmiotf.application
+import uuid
 
 # Authentication Information for @bumps_hunter
 ## https://twitter.com/bumps_hunter
@@ -34,6 +36,15 @@ TI_USERNAME = "cb0cb3b64354350db2024dfca30e493a"
 TI_PASSWORD = "TBOhrFxT4z"
 TI_URL      = "https://cb0cb3b64354350db2024dfca30e493a:TBOhrFxT4z@cdeservice.mybluemix.net"
 RED_THRESH = 2.0
+# MQTT
+ORG_ID = 'g6t2bu'
+DEVICE_TYPE = 'MQTTDevice'
+DEVICE_ID = 'DQGM50ADF8GJ'
+AUTH_TOKEN = ')l3k_j(h(tR4penx3g'
+
+AUTH_METHOD = 'apikey'
+API_KEY = 'a-g6t2bu-0lsj9vg8gt'
+API_TOKEN = 'YKLe&MtjSvd*FbXYpM'
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +174,46 @@ def bump_map_get_all(request):
 
 @login_required
 def bump_sensing(request):
-    return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request));
+    return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request))
+
+@login_required
+def bump_mqtt(request):
+    mqtt_options = {
+        'org': ORG_ID,
+        'id': str(uuid.uuid4()),
+        'auth-method': AUTH_METHOD,
+        'auth-key': API_KEY,
+        'auth-token': API_TOKEN,
+    }
+
+    def myEventCallback(event):
+        log = event.data
+        logger.debug('log = %s' % log)
+        user = User.objects.get(pk=log['user_id'])
+        logger.debug('user = %s' % user)
+        logged_at = datetime.datetime.fromtimestamp(log['logged_at'])
+
+        log_data = LogData(
+            lat=log['lat'],
+            lon=log['lon'],
+            acc_x=log['acc_x'],
+            acc_y=log['acc_y'],
+            acc_z=log['acc_z'],
+            logged_at=logged_at,
+            user=user,
+        )
+        logger.debug('log_data = %s' % log_data)
+
+        log_data.save()
+
+    try:
+        client = ibmiotf.application.Client(mqtt_options)
+        client.connect()
+        client.deviceEventCallback = myEventCallback
+        client.subscribeToDeviceEvents(DEVICE_TYPE, DEVICE_ID, "+")
+    except ibmiotf.ConnectionException as e:
+        logger.error('Connection failed: %s' % e)
+    return render_to_response('bump_hunter/bump_mqtt.html', context_instance=RequestContext(request))
 
 @login_required
 def bump_sensing_register(request):

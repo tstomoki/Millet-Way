@@ -2,3 +2,4 @@ django==1.8.3
 django-bootstrap-form==3.2
 mysql-python==1.2.5
 tweepy==3.4.0
+ibmiotf==0.1.2
