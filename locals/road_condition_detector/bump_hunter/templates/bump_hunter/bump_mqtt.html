@@ -86,13 +86,17 @@ var connectDevice = function(client) {
 
 var publish = function() {
     if (isConnected) {
+        var time = new Date().getTime() / 1000.0;
+
         var payload = {
             'd': {
-                'ax': ax.toFixed(3),
-                'ay': ay.toFixed(3),
-                'az': az.toFixed(3),
+                'acc_x': ax.toFixed(3),
+                'acc_y': ay.toFixed(3),
+                'acc_z': az.toFixed(3),
                 'lat': lat,
                 'lon': lon,
+                'logged_at': time,
+                'user_id': {{ user.id }}
             }
         };
 
