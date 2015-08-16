@@ -119,8 +119,7 @@ $(document).ready(function(){
                         // alert('clicked action');
                     },
                     infoWindow: {
-                        // content: '<p>user: ' + data.user + '</p><p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
-                      content: '<p>Averaged Acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
+                      content: '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Averaged Acc: </td><td>' + data.acc.toFixed(3) + '[m/s^2]</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr></table>',
                     },
                 });            
             }          
