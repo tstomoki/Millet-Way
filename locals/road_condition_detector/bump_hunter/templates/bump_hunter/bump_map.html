@@ -85,7 +85,22 @@ $(document).ready(function(){
         type: 'GET',
         dataType: 'json',
         success: function(response) {
-            // console.log(response);
+          for (var i = 0; i < response.markers.length; i++) {
+            var data = response.markers[i];
+                console.log(data);
+                map.addMarker({
+                    lat: data.lat,
+                    lng: data.lon,
+                    title: data.logged_at,
+                    click: function(e) {
+                        // alert('clicked action');
+                    },
+                    infoWindow: {
+                        // content: '<p>user: ' + data.user + '</p><p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
+                      content: '<p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
+                    },
+                });            
+            }          
             for (var i = 0; i < response.all_log_data.length; i++) {
                 var data = response.all_log_data[i];
                 // console.log(data);

@@ -33,6 +33,7 @@ LT_URL      = "https://gateway.watsonplatform.net/language-translation/api/v2"
 TI_USERNAME = "cb0cb3b64354350db2024dfca30e493a"
 TI_PASSWORD = "TBOhrFxT4z"
 TI_URL      = "https://cb0cb3b64354350db2024dfca30e493a:TBOhrFxT4z@cdeservice.mybluemix.net"
+RED_THRESH = 2.0
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,65 @@ def bump_map(request):
 def twitter_insights(request):
     return render_to_response('bump_hunter/twitter_insights.html',  # 使用するテンプレート
                               context_instance=RequestContext(request))  # その他標準のコンテキスト    
+
+@login_required
+def twitter_insights_get_all(request):
+    all_log_data = LogData.objects.all()
+    # logger.debug('all_log_data = %s' % all_log_data)
+    data_ary = []
+    cur = 0
+    next = 1
+    pre_label      = None
+    consective_arr = []
+    while cur < len(all_log_data) - 1:
+        cur_data = all_log_data[cur]
+        cur_lat = float(cur_data.lat)
+        cur_lon = float(cur_data.lon)
+        log_dict = {
+            'logged_at': cur_data.logged_at,
+            'lat': cur_lat,
+            'lon': cur_lon,
+        }
+        acc_sum = cur_data.get_acc_size()
+
+        count = 1
+        next_data = all_log_data[cur + count]
+        next_lat = float(next_data.lat)
+        next_lon = float(next_data.lon)
+        while cur + count < len(all_log_data) - 1 and cur_lat == next_lat and cur_lon == next_lon:
+            acc_sum += next_data.get_acc_size()
+            count += 1
+            next_data = all_log_data[cur + count]
+            next_lat = float(next_data.lat)
+            next_lon = float(next_data.lon)
+
+        cur += count + 1
+        log_dict['acc'] = acc_sum / count
+        log_label = 'red' if (log_dict['acc'] > RED_THRESH) else None
+        if (pre_label is not None) or (log_label is not None):
+            if (log_label is not None) and (pre_label is not None):
+                consective_arr.append(log_dict)
+            else:
+                if log_label is not None:
+                    consective_arr.append(log_dict)
+                    pre_label = log_label
+                if (pre_label is not None) and len(consective_arr) > 10:
+                    for _c_log in consective_arr:
+                        data_ary.append(_c_log)
+                    pre_label       = None
+                    log_label       = None
+                    consective_arr  = []
+
+    # for log_data in all_log_data:
+    #     log_dict = {}
+    #     log_dict['lat'] = float(log_data.lat)
+    #     log_dict['lon'] = float(log_data.lon)
+    #     log_dict['logged_at'] = log_data.logged_at
+    #     log_dict['acc'] = math.sqrt(math.pow(log_data.acc_x, 2) + math.sqrt(log_data.acc_y, 2) + math.pow(log_data.acc_z, 2))
+    #     # log_dict['user'] = unicode(log_data.user)
+    #     # logger.debug('log_data.user = %s' % log_data.user)
+    #     data_ary.append(log_dict)
+    return JsonResponse({'all_log_data': data_ary}, safe=False)
 
 # tweet method
 @login_required
@@ -87,9 +147,12 @@ def bump_tweet(request):
 def bump_map_get_all(request):
     all_log_data = LogData.objects.all()
     # logger.debug('all_log_data = %s' % all_log_data)
-    data_ary = []
-    cur = 0
-    next = 1
+    data_ary       = []
+    cur            = 0
+    next           = 1
+    pre_label      = None
+    consective_ary = []
+    markers_ary    = []
     while cur < len(all_log_data) - 1:
         cur_data = all_log_data[cur]
         cur_lat = float(cur_data.lat)
@@ -111,11 +174,28 @@ def bump_map_get_all(request):
             next_data = all_log_data[cur + count]
             next_lat = float(next_data.lat)
             next_lon = float(next_data.lon)
-
         cur += count + 1
         log_dict['acc'] = acc_sum / count
+        log_label = 'red' if (log_dict['acc'] > RED_THRESH) else None
+        if (pre_label is not None) or (log_label is not None):
+            if (log_label is not None) and (pre_label is not None):
+                consective_ary.append(log_dict)
+            else:
+                if log_label is not None:
+                    consective_ary.append(log_dict)
+                    pre_label = log_label
+                if (pre_label is not None) and len(consective_ary) > 10:
+                    base_data = consective_ary[len(consective_ary)/2]
+                    markers_dict = {
+                        'lat': base_data['lat'],
+                        'lon': base_data['lon'],
+                        'acc': base_data['acc']
+                    }
+                    markers_ary.append(markers_dict)
+                    pre_label       = None
+                    log_label       = None
+                    consective_ary  = []
         data_ary.append(log_dict)
-
     # for log_data in all_log_data:
     #     log_dict = {}
     #     log_dict['lat'] = float(log_data.lat)
@@ -125,8 +205,7 @@ def bump_map_get_all(request):
     #     # log_dict['user'] = unicode(log_data.user)
     #     # logger.debug('log_data.user = %s' % log_data.user)
     #     data_ary.append(log_dict)
-
-    return JsonResponse({'all_log_data': data_ary}, safe=False)
+    return JsonResponse({'all_log_data': data_ary, 'markers': markers_ary}, safe=False)
 
 @login_required
 def bump_sensing(request):
