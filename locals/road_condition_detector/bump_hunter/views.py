@@ -41,6 +41,12 @@ def bump_map(request):
     return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート
                               context_instance=RequestContext(request))  # その他標準のコンテキスト
 
+# twitter insights
+@login_required
+def twitter_insights(request):
+    return render_to_response('bump_hunter/twitter_insights.html',  # 使用するテンプレート
+                              context_instance=RequestContext(request))  # その他標準のコンテキスト    
+
 # tweet method
 @login_required
 def bump_tweet(request):
