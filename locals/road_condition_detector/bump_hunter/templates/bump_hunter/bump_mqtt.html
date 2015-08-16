@@ -86,6 +86,10 @@ var connectDevice = function(client) {
 
 var publish = function() {
     if (isConnected) {
+        if ((ax == 0 && ay == 0 && az == 0) || lat == 0 || lon == 0) {
+            return;
+        }
+
         var time = new Date().getTime() / 1000.0;
 
         var payload = {
