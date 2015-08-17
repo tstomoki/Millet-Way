@@ -48,6 +48,10 @@ API_TOKEN = 'YKLe&MtjSvd*FbXYpM'
 
 logger = logging.getLogger(__name__)
 
+def bump_index(request):
+    return render_to_response('bump_hunter/bump_index.html',  # 使用するテンプレート
+                              context_instance=RequestContext(request))  # その他標準のコンテキスト
+
 @login_required
 def bump_map(request):
     return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート

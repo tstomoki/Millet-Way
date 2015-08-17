@@ -5,7 +5,8 @@ from bump_hunter import views
 from django.http import HttpResponseRedirect
 
 urlpatterns = patterns('',
-                       (r'^$', lambda r: HttpResponseRedirect('bump_map/')),
+                       (r'^$', lambda r: HttpResponseRedirect('bump_index/')),
+                       url(r'^bump_index/$', views.bump_index, name='bump_index'),
                        url(r'^bump_map/$', views.bump_map, name='bump_map'),
                        url(r'^bump_tweet/$', views.bump_tweet, name='bump_tweet'),
                        url(r'^bump_map/get_all/$', views.bump_map_get_all, name='bump_map_get_all'),
