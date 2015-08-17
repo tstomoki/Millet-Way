@@ -253,6 +253,10 @@ def bump_sensing_register(request):
 def bump_chart(request):
     return render_to_response('bump_hunter/bump_chart.html', context_instance=RequestContext(request));
 
+@login_required
+def bump_insights(request):
+    return render_to_response('bump_hunter/bump_insights.html', context_instance=RequestContext(request));
+
 def logout(request):
     logout(request)
     render_to_response('bump_hunter/logout.html', context_instance=RequestContext(request))

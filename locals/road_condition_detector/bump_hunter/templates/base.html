@@ -21,7 +21,7 @@
     <nav class="navbar navbar-inverse">
       <div class="container-fluid">
         <div class="navbar-header">
-          <a class="navbar-brand" href="/bump_hunter/bump_map/"><!-- Bump Hunter --></a>
+          <a class="navbar-brand" href="/bump_hunter"><!-- Bump Hunter --></a>
           <!-- <a class="navbar-brand" href="/bump_hunter/bump_map/"><img src="{% static 'image/logo.png' %}" alt="Bump Hunter"> -->
         </div>
         <div>
@@ -30,6 +30,7 @@
             <li id="nav_sensing"><a href="/bump_hunter/bump_sensing/">Sensing</a></li>
             <li id="nav_chart"><a href="/bump_hunter/bump_chart/">Chart</a></li>
             <li id="nav_mqtt"><a href="/bump_hunter/bump_mqtt/">MQTT</a></li>
+            <li id="nav_mqtt"><a href="/bump_hunter/bump_insights/">Insights</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             {% if user.is_authenticated %}
