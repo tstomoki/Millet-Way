@@ -6,8 +6,8 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-
 from bump_hunter.models import LogData
+from bump_hunter.models import UserInsightForm
 
 import json
 import logging
@@ -255,7 +255,10 @@ def bump_chart(request):
 
 @login_required
 def bump_insights(request):
-    return render_to_response('bump_hunter/bump_insights.html', context_instance=RequestContext(request));
+    form = UserInsightForm()
+    return render_to_response('bump_hunter/bump_insights.html', {'form':form})
+#render_to_response('bump_hunter/bump_insights.html', context_instance=RequestContext(request));
+    
 
 def logout(request):
     logout(request)
