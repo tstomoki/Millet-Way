@@ -33,7 +33,7 @@ class LogData(models.Model):
 class UserInsight(models.Model):
     lat        = models.DecimalField(max_digits=12, decimal_places=9)
     lon        = models.DecimalField(max_digits=12, decimal_places=9)
-    user_name  = models.CharField(max_length=200, default='John Doe')
+    user_name  = models.CharField(max_length=200, default='')
     location   = models.CharField(max_length=200)
     comment    = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
