@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.forms import ModelForm
+from django.forms import Textarea
+from django.forms.widgets import TextInput
 
 import math
 
@@ -30,10 +33,39 @@ class LogData(models.Model):
 class UserInsight(models.Model):
     lat        = models.DecimalField(max_digits=12, decimal_places=9)
     lon        = models.DecimalField(max_digits=12, decimal_places=9)
-    user_name  = models.CharField(max_length=200, default='John Doe')
+    user_name  = models.CharField(max_length=200, default='')
     location   = models.CharField(max_length=200)
     comment    = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __unicode__(self):
         return "insight data at %s" % self.created_at.strftime('%Y/%m/%d')
+
+class UserInsightForm(ModelForm):
+    class Meta:
+        model = UserInsight
+        exclude = ('created_at', 'updated_at',)
+        widgets = {
+            'lat': TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '35.900010'
+            }),
+            'lon': TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '139.935685'
+            }),
+            'user_name': TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Bump Hunter'
+            }),
+            'location': TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Kashiwanoha Station'                           
+            }),            
+            'comment': Textarea(attrs={
+                'class': 'form-control',
+                'cols': 80,
+                'rows': 20,
+                'placeholder': 'There are too many bumps around this point!!!'
+            }),
+        }
