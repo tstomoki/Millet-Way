@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, get_object_or_404
 from django import forms
 from django.template import RequestContext
 from django.http import HttpResponse, JsonResponse, Http404
@@ -7,7 +7,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from bump_hunter.models import LogData
-from bump_hunter.models import UserInsightForm
+from bump_hunter.models import UserInsight, UserInsightForm
 
 import json
 import logging
@@ -34,7 +34,7 @@ LT_URL      = "https://gateway.watsonplatform.net/language-translation/api/v2"
 # Twitter insights
 TI_USERNAME = "cb0cb3b64354350db2024dfca30e493a"
 TI_PASSWORD = "TBOhrFxT4z"
-TI_URL      = "https://cb0cb3b64354350db2024dfca30e493a:TBOhrFxT4z@cdeservice.mybluemix.net"
+TI_URL      = "https://cb0cb3b64354350db2024dfca30e493a:TBOhrFxT4z@cdeservice.mybluemix.net:443/api/v1"
 RED_THRESH = 2.0
 # MQTT
 ORG_ID = 'g6t2bu'
@@ -254,11 +254,79 @@ def bump_chart(request):
     return render_to_response('bump_hunter/bump_chart.html', context_instance=RequestContext(request));
 
 @login_required
-def bump_insights(request):
+def bump_insights(request, id=None):
     form = UserInsightForm()
-    return render_to_response('bump_hunter/bump_insights.html', {'form':form})
-#render_to_response('bump_hunter/bump_insights.html', context_instance=RequestContext(request));
+    hidden_keyword = ""
+
+    if request.method == "POST":
+        if id is not None:
+            instance = get_object_or_404(UserInsight, id=id)
+        else:
+            form         = UserInsightForm(request.POST)
+            if form.is_valid():
+                user_insight = form.save(commit=False)
+                hidden_keyword = user_insight.location
+                user_insight.save()
+            else:
+                print form.errors
     
+    return render_to_response('bump_hunter/bump_insights.html', {'form':form, 'hidden_keyword': hidden_keyword}, context_instance=RequestContext(request))
+
+@login_required
+def bump_insights_get_all(request):
+    all_insight_data = UserInsight.objects.all()
+    data_ary = []
+    for cur_data in all_insight_data:
+        insight_dict = {
+            'lat': float(cur_data.lat),
+            'lon': float(cur_data.lon),
+            'user_name': cur_data.user_name,
+            'location_name': cur_data.location,
+            'comment': cur_data.comment,
+            'created_at': cur_data.created_at
+        }
+        data_ary.append(insight_dict)
+    return JsonResponse({'all_insight_data': data_ary}, safe=False)
+
+def bump_insights_get_tweets(request):
+    # use searched query
+    query = request.GET['query'] if (len(request.GET['query']) > 0) else "Tokyo Station"
+    # use TI api
+    url            = "%s/messages/search" % TI_URL
+    headers        = {'Content-type': 'application/json', 'Accept': 'application/json'}
+    positive_query = "%s sentiment: positive" % query
+    negative_query = "%s sentiment: negative" % query
+    tweets_size = 3
+
+    # requests
+    positive_response = requests.get(url, params={"q": positive_query, "size": tweets_size}, headers=headers)
+    negative_response = requests.get(url, params={"q": negative_query, "size": tweets_size}, headers=headers)
+
+    p_tweets = []
+    n_tweets = []    
+    if positive_response.status_code == requests.codes.ok:
+        positive_text = json.loads(positive_response.text)
+        for p_data in positive_text['tweets']:
+            if p_data.has_key('message'):
+                target_data = p_data['message']
+                tweet_data = {'user_name': target_data['actor']['displayName'],
+                              'at_name': target_data['actor']['preferredUsername'],
+                              'img_url':  target_data['actor']['image'],
+                              'body_text': target_data['body']
+                          }
+                p_tweets.append(tweet_data)
+    if negative_response.status_code == requests.codes.ok:
+        negative_text = json.loads(negative_response.text)
+        for n_data in negative_text['tweets']:
+            if n_data.has_key('message'):
+                target_data = n_data['message']
+                tweet_data = {'user_name': target_data['actor']['displayName'],
+                              'at_name': target_data['actor']['preferredUsername'],
+                              'img_url':  target_data['actor']['image'],
+                              'body_text': target_data['body']
+                          }
+                n_tweets.append(tweet_data)        
+    return JsonResponse({'positive_tweets': p_tweets, 'negative_tweets': n_tweets}, safe=False)    
 
 def logout(request):
     logout(request)
