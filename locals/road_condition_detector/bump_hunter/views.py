@@ -256,6 +256,7 @@ def bump_chart(request):
 @login_required
 def bump_insights(request, id=None):
     form = UserInsightForm()
+    hidden_keyword = ""
 
     if request.method == "POST":
         if id is not None:
@@ -264,11 +265,12 @@ def bump_insights(request, id=None):
             form         = UserInsightForm(request.POST)
             if form.is_valid():
                 user_insight = form.save(commit=False)
+                hidden_keyword = user_insight.location
                 user_insight.save()
             else:
                 print form.errors
     
-    return render_to_response('bump_hunter/bump_insights.html', {'form':form}, context_instance=RequestContext(request))
+    return render_to_response('bump_hunter/bump_insights.html', {'form':form, 'hidden_keyword': hidden_keyword}, context_instance=RequestContext(request))
 
 @login_required
 def bump_insights_get_all(request):
@@ -287,10 +289,11 @@ def bump_insights_get_all(request):
     return JsonResponse({'all_insight_data': data_ary}, safe=False)
 
 def bump_insights_get_tweets(request):
+    # use searched query
+    query = request.GET['query'] if (len(request.GET['query']) > 0) else "Tokyo Station"
     # use TI api
     url            = "%s/messages/search" % TI_URL
     headers        = {'Content-type': 'application/json', 'Accept': 'application/json'}
-    query          = "Tokyo Station"
     positive_query = "%s sentiment: positive" % query
     negative_query = "%s sentiment: negative" % query
     tweets_size = 3
