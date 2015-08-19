@@ -290,7 +290,7 @@ def bump_insights_get_tweets(request):
     # use TI api
     url            = "%s/messages/search" % TI_URL
     headers        = {'Content-type': 'application/json', 'Accept': 'application/json'}
-    query          = "Kashiwa Station"
+    query          = "Tokyo Station"
     positive_query = "%s sentiment: positive" % query
     negative_query = "%s sentiment: negative" % query
     tweets_size = 3
@@ -307,6 +307,7 @@ def bump_insights_get_tweets(request):
             if p_data.has_key('message'):
                 target_data = p_data['message']
                 tweet_data = {'user_name': target_data['actor']['displayName'],
+                              'at_name': target_data['actor']['preferredUsername'],
                               'img_url':  target_data['actor']['image'],
                               'body_text': target_data['body']
                           }
@@ -317,6 +318,7 @@ def bump_insights_get_tweets(request):
             if n_data.has_key('message'):
                 target_data = n_data['message']
                 tweet_data = {'user_name': target_data['actor']['displayName'],
+                              'at_name': target_data['actor']['preferredUsername'],
                               'img_url':  target_data['actor']['image'],
                               'body_text': target_data['body']
                           }

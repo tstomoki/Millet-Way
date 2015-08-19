@@ -62,13 +62,15 @@
     <div class="col-md-6">
       <div id="bump-map"></div>
     </div>
-    <h3 class="page-header">Bump Insights of others<br><span class="text-muted">Others also registered the location</span></h3>
-    <div class="col-md-3">
-      <h4 class="page-header"><span class="text-muted">Positive</span></h3>
+    <h3 class="page-header">Bump Insights of others<br><span class="text-muted">Other users are talking about the location</span></h3>
+    <div class="col-md-6">    
+      <h4 class="page-header"><span class="text-muted"><span style="color: Red;">Positive Tweets</span> around the location</span></h4>
+      <div id="positive-tweets-container"></div>
     </div>
-    <div class="col-md-3">
-      <h4 class="page-header"><span class="text-muted">Negative</span></h3>
-    </div>    
+    <div class="col-md-6">      
+      <h4 class="page-header"><span class="text-muted"><span style="color: Blue;">Negative Tweets</span> around the location</span></h4>
+      <div id="negative-tweets-container"></div>
+    </div>
   </div>
   
 </div>
@@ -112,7 +114,18 @@
      type: 'GET',
      dataType: 'json',
      success: function(response) {
-       debugger;
+       // Positive
+       for (var i = 0; i < response.positive_tweets.length; i++) {
+         var p_tweet = response.positive_tweets[i]
+         var insert_html =  '<table style="margin-top: 15px;"><tr><td valign="top" rowspan="3" style="padding: 10px;"><img class="i4twitter_image" src="' + p_tweet.img_url + '"></td><td width="100%"><span>' + p_tweet.user_name + '</span><span>' + p_tweet.at_name + '</span></td></tr><tr><td><div style="border-bottom:1px solid silver;">' + p_tweet.body_text + '</div></td></tr><tr><td>IBM Insights Twitter</td></tr></table>'
+         $("#positive-tweets-container").append(insert_html);
+       }
+       // Negative
+       for (var i = 0; i < response.negative_tweets.length; i++) {
+         var n_tweet = response.negative_tweets[i]
+         var insert_html =  '<table style="margin-top: 15px;"><tr><td valign="top" rowspan="3" style="padding: 10px;"><img class="i4twitter_image" src="' + n_tweet.img_url + '"></td><td width="100%"><span>' + n_tweet.user_name + '</span><span>' + n_tweet.at_name + '</span></td></tr><tr><td><div style="border-bottom:1px solid silver;">' + n_tweet.body_text + '</div></td></tr><tr><td>IBM Insights Twitter</td></tr></table>'
+         $("#negative-tweets-container").append(insert_html);         
+       }       
      }
    });      
  });
