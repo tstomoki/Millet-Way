@@ -59,19 +59,30 @@
       </form>      
     </div>
     <div class="col-md-6">
-      <h3 class="page-header">Bump Insights of others<br><span class="text-muted">Others also registered the location</span></h3>
-      <div class="col-md-3">
-        <h4 class="page-header"><span class="text-muted">Positive</span></h3>
-      </div>
-      <div class="col-md-3">
-        <h4 class="page-header"><span class="text-muted">Negative</span></h3>
-      </div>
+      <div id="bump-map"></div>
     </div>
+    <h3 class="page-header">Bump Insights of others<br><span class="text-muted">Others also registered the location</span></h3>
+    <div class="col-md-3">
+      <h4 class="page-header"><span class="text-muted">Positive</span></h3>
+    </div>
+    <div class="col-md-3">
+      <h4 class="page-header"><span class="text-muted">Negative</span></h3>
+    </div>    
   </div>
   
 </div>
 
 <script language="javascript" type="text/javascript">
+ var map;
+ $(document).ready(function(){
+   map = new GMaps({
+     div: '#bump-map',
+     zoom: 12,
+     lat: 35.681382,
+     lng: 139.766083999
+   });
+ });
+ var BLUE_ICON_PATH = '/static/image/blue-dot.png'; 
  function GeoLocate() {
    var default_str     = $("#geolocate-link").text();
    var target_ele      = $("#geolocate-link");
@@ -79,7 +90,13 @@
    GMaps.geolocate({
      success: function(position) {
        $("#input-lat").val(position.coords.latitude);
-       $("#input-lon").val(position.coords.longitude)
+       $("#input-lon").val(position.coords.longitude);
+       map.setCenter(position.coords.latitude, position.coords.longitude);
+       map.addMarker({
+         lat: position.coords.latitude,
+         lng: position.coords.longitude,
+         icon: BLUE_ICON_PATH,
+       });                
      },
      error: function(error) {
        alert('Geolocation failed: '+error.message);
@@ -104,6 +121,12 @@
          var latlng = results[0].geometry.location;
          $("#input-lat").val(latlng.lat());
          $("#input-lon").val(latlng.lng());
+         map.setCenter(latlng.lat(), latlng.lng());
+         map.addMarker({
+           lat: latlng.lat(),
+           lng: latlng.lng(),
+           icon: BLUE_ICON_PATH,
+         });
          alert("Geocoding was conducted successfully!");
        }else{
          target_ele.text(default_str);
