@@ -105,7 +105,16 @@
           }    
           map.addLayer('traffic');              
         }
-   });   
+   });
+   // display twitter
+   $.ajax({
+     url: 'get_tweets/',
+     type: 'GET',
+     dataType: 'json',
+     success: function(response) {
+       debugger;
+     }
+   });      
  });
  function GeoLocate() {
    var default_str     = $("#geolocate-link").text();
