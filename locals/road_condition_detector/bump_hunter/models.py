@@ -39,7 +39,7 @@ class UserInsight(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __unicode__(self):
-        return self.created_at
+        return "Insight data at %s" % self.created_at.strftime('%Y/%m/%d')
 
 class UserInsightForm(ModelForm):
     class Meta:

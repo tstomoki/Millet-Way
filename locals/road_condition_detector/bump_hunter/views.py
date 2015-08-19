@@ -270,6 +270,22 @@ def bump_insights(request, id=None):
     
     return render_to_response('bump_hunter/bump_insights.html', {'form':form}, context_instance=RequestContext(request))
 
+@login_required
+def bump_insights_get_all(request):
+    all_insight_data = UserInsight.objects.all()
+    data_ary = []
+    for cur_data in all_insight_data:
+        insight_dict = {
+            'lat': float(cur_data.lat),
+            'lon': float(cur_data.lon),
+            'user_name': cur_data.user_name,
+            'location_name': cur_data.location,
+            'comment': cur_data.comment,
+            'created_at': cur_data.created_at
+        }
+        data_ary.append(insight_dict)
+    return JsonResponse({'all_insight_data': data_ary}, safe=False)    
+
 def logout(request):
     logout(request)
     render_to_response('bump_hunter/logout.html', context_instance=RequestContext(request))

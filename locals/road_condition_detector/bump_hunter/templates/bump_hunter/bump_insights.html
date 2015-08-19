@@ -75,6 +75,8 @@
 
 <script language="javascript" type="text/javascript">
  var map;
+ var BLUE_ICON_PATH = '/static/image/blue-dot.png';
+ var YELLOW_ICON_PATH = '/static/image/yellow-dot.png';  
  $(document).ready(function(){
    map = new GMaps({
      div: '#bump-map',
@@ -82,8 +84,29 @@
      lat: 35.681382,
      lng: 139.766083999
    });
+   // visualization of insights data
+   $.ajax({
+        url: 'get_all/',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+          for (var i = 0; i < response.all_insight_data.length; i++) {
+            var data = response.all_insight_data[i];
+            // console.log(data);
+            map.addMarker({
+              lat: data.lat,
+              lng: data.lon,
+              title: data.created_at,
+              infoWindow: {
+                content: '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Location: </td><td>' + data.location_name + '</td><tr><td style="font-weight: bold; min-width: 100px;">User Name: </td><td>' + data.user_name + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">Comment</td><td>' + data.comment + '</td></tr></table><div style="margin: 10px;"><a href="http://maps.google.com/?cbll=' + data.lat + ',' + data.lon + '&layer=c" target="_blank">Street View Link</a></div>'
+              },
+              icon: YELLOW_ICON_PATH,
+            });
+          }    
+          map.addLayer('traffic');              
+        }
+   });   
  });
- var BLUE_ICON_PATH = '/static/image/blue-dot.png'; 
  function GeoLocate() {
    var default_str     = $("#geolocate-link").text();
    var target_ele      = $("#geolocate-link");
