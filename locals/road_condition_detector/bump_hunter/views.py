@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, get_object_or_404
 from django import forms
 from django.template import RequestContext
 from django.http import HttpResponse, JsonResponse, Http404
@@ -7,7 +7,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from bump_hunter.models import LogData
-from bump_hunter.models import UserInsightForm
+from bump_hunter.models import UserInsight, UserInsightForm
 
 import json
 import logging
@@ -254,11 +254,21 @@ def bump_chart(request):
     return render_to_response('bump_hunter/bump_chart.html', context_instance=RequestContext(request));
 
 @login_required
-def bump_insights(request):
+def bump_insights(request, id=None):
     form = UserInsightForm()
-    return render_to_response('bump_hunter/bump_insights.html', {'form':form})
-#render_to_response('bump_hunter/bump_insights.html', context_instance=RequestContext(request));
+
+    if request.method == "POST":
+        if id is not None:
+            instance = get_object_or_404(UserInsight, id=id)
+        else:
+            form         = UserInsightForm(request.POST)
+            if form.is_valid():
+                user_insight = form.save(commit=False)
+                user_insight.save()
+            else:
+                print form.errors
     
+    return render_to_response('bump_hunter/bump_insights.html', {'form':form}, context_instance=RequestContext(request))
 
 def logout(request):
     logout(request)
