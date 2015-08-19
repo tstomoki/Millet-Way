@@ -42,7 +42,7 @@
             {{ form.location}}
           </div>
           <div class="col-sm-4">
-            <a class="btn btn-lg btn-primary" href="" role="button" style="width: 100%;">Geocording</a>
+            <a id="geocode-link" class="btn btn-lg btn-primary" href="#" onclick="GeoCode();" role="button" style="width: 100%;">Geocoding</a>
           </div>          
         </div>
           
@@ -75,8 +75,7 @@
  function GeoLocate() {
    var default_str     = $("#geolocate-link").text();
    var target_ele      = $("#geolocate-link");
-   var default_onclick = $("#geolocate-link").attr("onclick");
-   target_ele.text('Now Geocoding...');
+   target_ele.text('Now Geolocating...');
    GMaps.geolocate({
      success: function(position) {
        $("#input-lat").val(position.coords.latitude);
@@ -94,5 +93,25 @@
      }
    });     
  }
+ function GeoCode() {
+   var default_str     = $("#geocode-link").text();
+   var target_ele      = $("#geocode-link");
+   target_ele.text('Now Geocoding...');
+   GMaps.geocode({
+     address: $('#input-location').val().trim(),
+     callback: function(results, status){
+       if(status=='OK'){
+         var latlng = results[0].geometry.location;
+         $("#input-lat").val(latlng.lat());
+         $("#input-lon").val(latlng.lng());
+         alert("Geocoding was conducted successfully!");
+       }else{
+         target_ele.text(default_str);
+         alert("Geocoding was failed...");
+       }
+       target_ele.text(default_str);       
+     }
+   });
+ } 
 </script>
 {% endblock content %}

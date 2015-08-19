@@ -61,6 +61,7 @@ class UserInsightForm(ModelForm):
                 'placeholder': 'Bump Hunter'
             }),
             'location': TextInput(attrs={
+                'id':'input-location',
                 'class': 'form-control',
                 'placeholder': 'Kashiwanoha Station'                           
             }),            
