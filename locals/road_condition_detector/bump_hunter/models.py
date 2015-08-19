@@ -47,10 +47,12 @@ class UserInsightForm(ModelForm):
         exclude = ('created_at', 'updated_at',)
         widgets = {
             'lat': TextInput(attrs={
+                'id':'input-lat',
                 'class': 'form-control',
                 'placeholder': '35.900010'
             }),
             'lon': TextInput(attrs={
+                'id':'input-lon',
                 'class': 'form-control',
                 'placeholder': '139.935685'
             }),

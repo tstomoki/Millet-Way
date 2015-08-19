@@ -27,7 +27,7 @@
             {{ form.lon}}      
           </div>
           <div class="col-sm-5" style="margin-top: -30px;">
-            <a class="btn btn-lg btn-primary" href="" role="button">Get your current location</a>
+            <a id="geolocate-link" class="btn btn-lg btn-primary" href="#" onclick="GeoLocate();" role="button">Get your current location</a>
           </div>          
         </div>
         <div class="form-group">
@@ -70,4 +70,29 @@
   </div>
   
 </div>
+
+<script language="javascript" type="text/javascript">
+ function GeoLocate() {
+   var default_str     = $("#geolocate-link").text();
+   var target_ele      = $("#geolocate-link");
+   var default_onclick = $("#geolocate-link").attr("onclick");
+   target_ele.text('Now Geocoding...');
+   GMaps.geolocate({
+     success: function(position) {
+       $("#input-lat").val(position.coords.latitude);
+       $("#input-lon").val(position.coords.longitude)
+     },
+     error: function(error) {
+       alert('Geolocation failed: '+error.message);
+     },
+     not_supported: function() {
+       alert("Your browser does not support geolocation");
+     },
+     always: function() {
+       target_ele.text(default_str);
+       alert("Your current location is coorded!");
+     }
+   });     
+ }
+</script>
 {% endblock content %}
