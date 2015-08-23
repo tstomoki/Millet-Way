@@ -237,6 +237,53 @@ def bump_mqtt(request):
     return render_to_response('bump_hunter/bump_mqtt.html', context_instance=RequestContext(request))
 
 @login_required
+def bump_mqtt_adjust_db(request):
+    all_log_data = LogData.objects.all()
+    # logger.debug('all_log_data = %s' % all_log_data)
+    data_ary       = []
+    cur            = 0
+    next           = 1
+    created_count  = 0
+    while cur < len(all_log_data) - 1:
+        cur_data = all_log_data[cur]
+        cur_lat = float(cur_data.lat)
+        cur_lon = float(cur_data.lon)
+        log_data = LogData(
+            lat=cur_lat,
+            lon=cur_lon,
+            acc_x=0,
+            acc_y=0,
+            acc_z=0,
+            logged_at=cur_data.logged_at,
+            user=cur_data.user,
+        )
+        # log_dict = {
+        #     'logged_at': cur_data.logged_at,
+        #     'lat': cur_lat,
+        #     'lon': cur_lon,
+        # }
+        acc_sum = cur_data.get_acc_size()
+
+        count = 1
+        next_data = all_log_data[cur + count]
+        next_lat = float(next_data.lat)
+        next_lon = float(next_data.lon)
+        while cur + count < len(all_log_data) - 1 and cur_lat == next_lat and cur_lon == next_lon:
+            acc_sum += next_data.get_acc_size()
+            count += 1
+            next_data = all_log_data[cur + count]
+            next_lat = float(next_data.lat)
+            next_lon = float(next_data.lon)
+        cur += count + 1
+        log_data.acc = acc_sum / count
+        # log_dict['acc'] = acc_sum / count
+        # data_ary.append(log_dict)
+        log_data.save()
+        created_count += 1
+
+    return JsonResponse({'created': created_count, }, safe=False)
+
+@login_required
 def bump_sensing_register(request):
     # logger.debug('POST = %s' % request.POST)
     logs = json.loads(request.POST['log_json_str'])['logs']

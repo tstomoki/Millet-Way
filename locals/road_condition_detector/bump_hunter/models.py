@@ -21,6 +21,7 @@ class LogData(models.Model):
     acc_x      = models.DecimalField(max_digits=7, decimal_places=3)
     acc_y      = models.DecimalField(max_digits=7, decimal_places=3)
     acc_z      = models.DecimalField(max_digits=7, decimal_places=3)
+    acc        = models.DecimalField(max_digits=7, decimal_places=3)
     logged_at  = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -63,8 +64,8 @@ class UserInsightForm(ModelForm):
             'location': TextInput(attrs={
                 'id':'input-location',
                 'class': 'form-control',
-                'placeholder': 'Kashiwanoha Station'                           
-            }),            
+                'placeholder': 'Kashiwanoha Station'
+            }),
             'comment': Textarea(attrs={
                 'class': 'form-control',
                 'cols': 80,
