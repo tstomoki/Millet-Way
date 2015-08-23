@@ -46,6 +46,10 @@ AUTH_METHOD = 'apikey'
 API_KEY = 'a-g6t2bu-0lsj9vg8gt'
 API_TOKEN = 'YKLe&MtjSvd*FbXYpM'
 
+prev_lat = 0.0
+prev_lon = 0.0
+
+# log
 logger = logging.getLogger(__name__)
 
 def bump_index(request):
@@ -72,7 +76,7 @@ def bump_map_get_tweets(request):
     if response.status_code == requests.codes.ok:
         LT_result_data = json.loads(response.text)
         LT_str = LT_result_data['translations'][0]['translation']
-        update_str = "%s (%s)" % (LT_str, timestamp)    
+        update_str = "%s (%s)" % (LT_str, timestamp)
     return JsonResponse({'all_log_data': data_ary, 'markers': markers_ary}, safe=False)
 
 # tweet method
@@ -190,25 +194,38 @@ def bump_mqtt(request):
         'auth-token': API_TOKEN,
     }
 
+    # prev_lat = 0
+    # prev_lon = 0
+
     def myEventCallback(event):
+        global prev_lat, prev_lon
+
         log = event.data
         logger.debug('log = %s' % log)
-        user = User.objects.get(pk=log['user_id'])
-        logger.debug('user = %s' % user)
-        logged_at = datetime.datetime.fromtimestamp(log['logged_at'])
 
-        log_data = LogData(
-            lat=log['lat'],
-            lon=log['lon'],
-            acc_x=log['acc_x'],
-            acc_y=log['acc_y'],
-            acc_z=log['acc_z'],
-            logged_at=logged_at,
-            user=user,
-        )
-        logger.debug('log_data = %s' % log_data)
+        logger.debug('prev_lat = %f' % prev_lat)
+        logger.debug('prev_lon = %f' % prev_lon)
 
-        log_data.save()
+        if not (prev_lat == log['lat'] and prev_lon == log['lon']):
+            prev_lat = log['lat']
+            prev_lon = log['lon']
+
+            user = User.objects.get(pk=log['user_id'])
+            logger.debug('user = %s' % user)
+            logged_at = datetime.datetime.fromtimestamp(log['logged_at'])
+
+            log_data = LogData(
+                lat=log['lat'],
+                lon=log['lon'],
+                acc_x=log['acc_x'],
+                acc_y=log['acc_y'],
+                acc_z=log['acc_z'],
+                logged_at=logged_at,
+                user=user,
+            )
+            logger.debug('log_data = %s' % log_data)
+
+            log_data.save()
 
     try:
         client = ibmiotf.application.Client(mqtt_options)
@@ -269,7 +286,7 @@ def bump_insights(request, id=None):
                 user_insight.save()
             else:
                 print form.errors
-    
+
     return render_to_response('bump_hunter/bump_insights.html', {'form':form, 'hidden_keyword': hidden_keyword}, context_instance=RequestContext(request))
 
 @login_required
@@ -303,7 +320,7 @@ def bump_insights_get_tweets(request):
     negative_response = requests.get(url, params={"q": negative_query, "size": tweets_size}, headers=headers)
 
     p_tweets = []
-    n_tweets = []    
+    n_tweets = []
     if positive_response.status_code == requests.codes.ok:
         positive_text = json.loads(positive_response.text)
         for p_data in positive_text['tweets']:
@@ -325,8 +342,8 @@ def bump_insights_get_tweets(request):
                               'img_url':  target_data['actor']['image'],
                               'body_text': target_data['body']
                           }
-                n_tweets.append(tweet_data)        
-    return JsonResponse({'positive_tweets': p_tweets, 'negative_tweets': n_tweets}, safe=False)    
+                n_tweets.append(tweet_data)
+    return JsonResponse({'positive_tweets': p_tweets, 'negative_tweets': n_tweets}, safe=False)
 
 def logout(request):
     logout(request)

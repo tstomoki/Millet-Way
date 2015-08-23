@@ -25,8 +25,9 @@ var ORG_ID = 'g6t2bu';
 var CLIENT_ID = 'd:g6t2bu:MQTTDevice:DQGM50ADF8GJ';
 var PASSWORD = ')l3k_j(h(tR4penx3g';
 
-var isConnected = false;
-var ax = 0, ay = 0, az = 0, lat = 0, lon = 0;
+var connected = false;
+var ax = [], ay = [], az = [];
+var lat = 0, lon = 0;
 var topic = "iot-2/evt/sensorData/fmt/json-iotf";
 
 $(function() {
@@ -36,14 +37,17 @@ $(function() {
 
     // acceleration
     window.ondevicemotion = function(e) {
-        ax = parseFloat(e.acceleration.x || 0);
-        ay = parseFloat(e.acceleration.y || 0);
-        az = parseFloat(e.acceleration.z || 0);
-        $('#acc_x').text(ax);
-        $('#acc_y').text(ay);
-        $('#acc_z').text(az);
-
-        // publish();
+        var cur_ax = parseFloat(e.acceleration.x || 0);
+        var cur_ay = parseFloat(e.acceleration.y || 0);
+        var cur_az = parseFloat(e.acceleration.z || 0);
+        $('#acc_x').text(cur_ax);
+        $('#acc_y').text(cur_ay);
+        $('#acc_z').text(cur_az);
+        if (!(cur_ax == 0 && cur_ay == 0 && cur_az == 0)) {
+            ax.push(cur_ax);
+            ay.push(cur_ay);
+            az.push(cur_az);
+        }
     };
 
     // location
@@ -54,12 +58,15 @@ $(function() {
             timeout: 5000
         };
         navigator.geolocation.watchPosition(function(pos) {
-            lat = pos.coords.latitude;
-            lon = pos.coords.longitude;
-            $('#lat').text(lat);
-            $('#lon').text(lon);
-
-            // publish(); // DEBUG
+            var cur_lat = pos.coords.latitude;
+            var cur_lon = pos.coords.longitude;
+            if (!(cur_lat == lat && cur_lon == lon)) {
+                lat = cur_lat;
+                lon = cur_lon;
+                $('#lat').text(lat);
+                $('#lon').text(lon);
+                publish();
+            }
         }, function(err) {
             console.warn('ERROR(' + err.code + '): ' + err.message);
         }, options);
@@ -69,8 +76,6 @@ $(function() {
 
     // navbar
     $('#nav_mqtt').addClass('active');
-
-    setInterval(publish, 1000);
 });
 
 var connectDevice = function(client) {
@@ -85,18 +90,26 @@ var connectDevice = function(client) {
 };
 
 var publish = function() {
-    if (isConnected) {
-        if ((ax == 0 && ay == 0 && az == 0) || lat == 0 || lon == 0) {
+    if (connected) {
+        if (ax.length == 0 || ay.length == 0 || az.length == 0 || lat == 0 || lon == 0) {
             return;
         }
 
         var time = new Date().getTime() / 1000.0;
+        var raw_ax = ax.concat();
+        var raw_ay = ay.concat();
+        var raw_az = az.concat();
+        ax = [], ay = [], az = [];
+
+        var ave_ax = calcAverageAcc(raw_ax);
+        var ave_ay = calcAverageAcc(raw_ay);
+        var ave_az = calcAverageAcc(raw_az);
 
         var payload = {
             'd': {
-                'acc_x': ax.toFixed(3),
-                'acc_y': ay.toFixed(3),
-                'acc_z': az.toFixed(3),
+                'acc_x': ave_ax.toFixed(3),
+                'acc_y': ave_ay.toFixed(3),
+                'acc_z': ave_az.toFixed(3),
                 'lat': lat,
                 'lon': lon,
                 'logged_at': time,
@@ -110,7 +123,7 @@ var publish = function() {
             client.send(message);
             console.log('[%s] Published', new Date().getTime());
         } catch (err) {
-            isConnected = false;
+            connected = false;
             $('#status').text('Disconnected');
             setTimeout(connectDevice(client), 1000);
         }
@@ -120,7 +133,7 @@ var publish = function() {
 var onConnectSuccess = function() {
     // The device connected successfully
     console.log("Connected Successfully!");
-    isConnected = true;
+    connected = true;
     $('#status').text('Connected');
 };
 
@@ -129,5 +142,14 @@ var onConnectFailure = function() {
     console.log("Could not connect to IoT Foundation! Trying again in one second.");
     setTimeout(connectDevice(client), 1000);
 };
+
+var calcAverageAcc = function(acc) {
+    var ave = 0;
+    for (var i = 0; i < acc.length; i++) {
+        ave += Math.abs(acc[i]);
+    }
+    return ave / acc.length;
+};
+
 </script>
 {% endblock content %}
