@@ -162,10 +162,16 @@ LOGGING = {
             'class':'logging.StreamHandler',
             'formatter': 'simple'
         },
+        'file': {
+            'level':'DEBUG',
+            'class':'logging.FileHandler',
+            'formatter':'simple',
+            'filename':'bump_hunter.log',
+        },
     },
     'loggers': {
         'bump_hunter':{
-            'handlers': ['console',],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
         },
     },
