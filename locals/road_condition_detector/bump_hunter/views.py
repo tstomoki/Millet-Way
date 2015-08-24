@@ -18,6 +18,7 @@ import tweepy
 import math
 import ibmiotf.application
 import uuid
+import re
 
 # Authentication Information for @bumps_hunter
 ## https://twitter.com/bumps_hunter
@@ -256,7 +257,8 @@ def bump_insights_get_tweets(request):
     headers        = {'Content-type': 'application/json', 'Accept': 'application/json'}
     positive_query = "%s sentiment: positive" % query
     negative_query = "%s sentiment: negative" % query
-    tweets_size = 3
+    tweets_size    = 3
+    reg_format     = re.compile("(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})")
 
     # requests
     positive_response = requests.get(url, params={"q": positive_query, "size": tweets_size}, headers=headers)
@@ -269,11 +271,13 @@ def bump_insights_get_tweets(request):
         for p_data in positive_text['tweets']:
             if p_data.has_key('message'):
                 target_data = p_data['message']
-                tweet_data = {'user_name': target_data['actor']['displayName'],
-                              'at_name': target_data['actor']['preferredUsername'],
-                              'img_url':  target_data['actor']['image'],
-                              'body_text': target_data['body']
-                          }
+                date_reg    = reg_format.search(target_data['postedTime'])
+                tweet_data  = {'user_name': target_data['actor']['displayName'],
+                               'at_name': target_data['actor']['preferredUsername'],
+                               'img_url':  target_data['actor']['image'],
+                               'body_text': target_data['body'],
+                               'posted_at': "%s %s" % (date_reg.group(1), date_reg.group(2))
+                           }
                 p_tweets.append(tweet_data)
     if negative_response.status_code == requests.codes.ok:
         negative_text = json.loads(negative_response.text)
