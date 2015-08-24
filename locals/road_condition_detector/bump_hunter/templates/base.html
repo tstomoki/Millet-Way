@@ -18,44 +18,55 @@
     {% block extrahead %}{% endblock %}
   </head>
   <body>
-    <nav class="navbar navbar-inverse">
-      <div class="container-fluid">
+<nav class="navbar navbar-inverse" role="navigation">
+    <div class="container-fluid">
+    
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
         <div class="navbar-header">
           <a class="navbar-brand" href="/bump_hunter"><!-- Bump Hunter --></a>
-          <!-- <a class="navbar-brand" href="/bump_hunter/bump_map/"><img src="{% static 'image/logo.png' %}" alt="Bump Hunter"> -->
-        </div>
-        <div>
-          <ul class="nav navbar-nav">
-            <li id="nav_roadway" class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Roadway <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="/bump_hunter/bump_map/roadway/">Map</a></li>
-                <li><a href="/bump_hunter/bump_sensing/roadway/">Sensing</a></li>
-              </ul>
-            </li>
-            <li id="nav_sidewalk" class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sidewalk <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="/bump_hunter/bump_map/sidewalk/">Map</a></li>
-                <li><a href="/bump_hunter/bump_sensing/sidewalk/">Sensing</a></li>
-              </ul>
-            </li>
-            <li id="nav_chart"><a href="/bump_hunter/bump_chart/">Chart</a></li>
-            <li id="nav_insights"><a href="/bump_hunter/bump_insights/">Insights</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            {% if user.is_authenticated %}
-            <li><a href="#"><span class="glyphicon glyphicon-user"></span> {{ user.get_username }}</a></li>
-            <li><a href="/bump_hunter/logout/"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
-            {% endif %}
-          </ul>
         </div>
       </div>
-    </nav>
-    <div class="container">
-      {% block content %}
-      {{ content }}
-      {% endblock %}
+  
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li id="nav_roadway" class="dropdown">            
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Roadway <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/bump_hunter/bump_map/roadway/">Map</a></li>
+              <li><a href="/bump_hunter/bump_sensing/roadway/">Sensing</a></li>
+            </ul>
+          </li>
+          <li id="nav_sidewalk" class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sidewalk <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/bump_hunter/bump_map/sidewalk/">Map</a></li>
+              <li><a href="/bump_hunter/bump_sensing/sidewalk/">Sensing</a></li>
+            </ul>
+          </li>
+          <li id="nav_chart"><a href="/bump_hunter/bump_chart/">Chart</a></li>
+          <li id="nav_insights"><a href="/bump_hunter/bump_insights/">Insights</a></li>          
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right">
+          {% if user.is_authenticated %}
+          <li><a href="#"><span class="glyphicon glyphicon-user"></span> {{ user.get_username }}</a></li>
+          <li><a href="/bump_hunter/logout/"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+          {% endif %}          
+        </ul>
+      </div>
+      
     </div>
+  </nav>
+  <div class="container-fluid" style="max-width: 1170px;">
+    {% block content %}
+    {{ content }}
+    {% endblock %}
+  </div>
   </body>
 </html>
