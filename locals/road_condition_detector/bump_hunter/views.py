@@ -279,17 +279,21 @@ def bump_insights_get_tweets(request):
                                'posted_at': "%s %s" % (date_reg.group(1), date_reg.group(2))
                            }
                 p_tweets.append(tweet_data)
+        p_tweets.reverse()
     if negative_response.status_code == requests.codes.ok:
         negative_text = json.loads(negative_response.text)
         for n_data in negative_text['tweets']:
             if n_data.has_key('message'):
                 target_data = n_data['message']
-                tweet_data = {'user_name': target_data['actor']['displayName'],
-                              'at_name': target_data['actor']['preferredUsername'],
-                              'img_url':  target_data['actor']['image'],
-                              'body_text': target_data['body']
-                          }
+                date_reg    = reg_format.search(target_data['postedTime'])                
+                tweet_data  = {'user_name': target_data['actor']['displayName'],
+                               'at_name': target_data['actor']['preferredUsername'],
+                               'img_url':  target_data['actor']['image'],
+                               'body_text': target_data['body'],
+                               'posted_at': "%s %s" % (date_reg.group(1), date_reg.group(2))
+                           }
                 n_tweets.append(tweet_data)
+        n_tweets.reverse()
     return JsonResponse({'positive_tweets': p_tweets, 'negative_tweets': n_tweets}, safe=False)
 
 def logout(request):
