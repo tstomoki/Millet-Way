@@ -228,8 +228,8 @@ def bump_insights(request, id=None):
                 form = UserInsightForm(request.POST, request.FILES)
             else:
                 form = UserInsightForm(request.POST)
-            logger.debug('POST = %s' % request.POST)
-            logger.debug('FILES = %s' % request.FILES)
+            # logger.debug('POST = %s' % request.POST)
+            # logger.debug('FILES = %s' % request.FILES)
             if form.is_valid():
                 user_insight = form.save(commit=False)
                 hidden_keyword = user_insight.location
@@ -258,8 +258,10 @@ def bump_insights_get_all(request):
             'location_name': cur_data.location,
             'comment': cur_data.comment,
             'created_at': cur_data.created_at,
-            'image_url': cur_data.image.url
+            # 'image_url': cur_data.image.url
         }
+        if cur_data.image:
+            insight_dict['image_url'] = cur_data.image.url
         data_ary.append(insight_dict)
     return JsonResponse({'all_insight_data': data_ary}, safe=False)
 
