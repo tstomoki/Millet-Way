@@ -35,7 +35,7 @@ class UserInsight(models.Model):
     lat          = models.DecimalField(max_digits=20, decimal_places=17)
     lon          = models.DecimalField(max_digits=20, decimal_places=17)
     user_name    = models.CharField(max_length=200, default='')
-    insight_type = models.CharField(max_length=200)
+    insight_type = models.CharField(max_length=200, default='')
     location     = models.CharField(max_length=200)
     comment      = models.CharField(max_length=200)
     created_at   = models.DateTimeField(auto_now_add=True)
