@@ -120,34 +120,20 @@ def bump_map_get_all(request):
     all_log_data = LogData.objects.all()
     # logger.debug('all_log_data = %s' % all_log_data)
     data_ary       = []
-    cur            = 0
-    next           = 1
     pre_label      = None
     consective_ary = []
     markers_ary    = []
-    while cur < len(all_log_data) - 1:
-        cur_data = all_log_data[cur]
-        cur_lat = float(cur_data.lat)
-        cur_lon = float(cur_data.lon)
-        log_dict = {
-            'logged_at': cur_data.logged_at,
-            'lat': cur_lat,
-            'lon': cur_lon,
-        }
-        acc_sum = cur_data.get_acc_size()
 
-        count = 1
-        next_data = all_log_data[cur + count]
-        next_lat = float(next_data.lat)
-        next_lon = float(next_data.lon)
-        while cur + count < len(all_log_data) - 1 and cur_lat == next_lat and cur_lon == next_lon:
-            acc_sum += next_data.get_acc_size()
-            count += 1
-            next_data = all_log_data[cur + count]
-            next_lat = float(next_data.lat)
-            next_lon = float(next_data.lon)
-        cur += count + 1
-        log_dict['acc'] = acc_sum / count
+    for log_data in all_log_data:
+        # username = log_data.user.username
+        log_dict = {
+            'logged_at': log_data.logged_at,
+            'lat': float(log_data.lat),
+            'lon': float(log_data.lon),
+            'acc': float(log_data.acc),
+            # 'username': username,
+        }
+
         log_label = 'red' if (log_dict['acc'] > RED_THRESH) else None
         if (pre_label is not None) or (log_label is not None):
             if (log_label is not None) and (pre_label is not None):
@@ -168,24 +154,13 @@ def bump_map_get_all(request):
                     pre_label       = None
                     log_label       = None
                     consective_ary  = []
+
         data_ary.append(log_dict)
-    # for log_data in all_log_data:
-    #     log_dict = {}
-    #     log_dict['lat'] = float(log_data.lat)
-    #     log_dict['lon'] = float(log_data.lon)
-    #     log_dict['logged_at'] = log_data.logged_at
-    #     log_dict['acc'] = math.sqrt(math.pow(log_data.acc_x, 2) + math.sqrt(log_data.acc_y, 2) + math.pow(log_data.acc_z, 2))
-    #     # log_dict['user'] = unicode(log_data.user)
-    #     # logger.debug('log_data.user = %s' % log_data.user)
-    #     data_ary.append(log_dict)
+
     return JsonResponse({'all_log_data': data_ary, 'markers': markers_ary}, safe=False)
 
 @login_required
 def bump_sensing(request):
-    return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request))
-
-@login_required
-def bump_mqtt(request):
     mqtt_options = {
         'org': ORG_ID,
         'id': str(uuid.uuid4()),
@@ -217,9 +192,7 @@ def bump_mqtt(request):
             log_data = LogData(
                 lat=log['lat'],
                 lon=log['lon'],
-                acc_x=log['acc_x'],
-                acc_y=log['acc_y'],
-                acc_z=log['acc_z'],
+                acc=log['acc'],
                 logged_at=logged_at,
                 user=user,
             )
@@ -234,84 +207,7 @@ def bump_mqtt(request):
         client.subscribeToDeviceEvents(DEVICE_TYPE, DEVICE_ID, "+")
     except ibmiotf.ConnectionException as e:
         logger.error('Connection failed: %s' % e)
-    return render_to_response('bump_hunter/bump_mqtt.html', context_instance=RequestContext(request))
-
-@login_required
-def bump_mqtt_adjust_db(request):
-    all_log_data = LogData.objects.all()
-    # logger.debug('all_log_data = %s' % all_log_data)
-    data_ary       = []
-    cur            = 0
-    next           = 1
-    created_count  = 0
-    while cur < len(all_log_data) - 1:
-        cur_data = all_log_data[cur]
-        cur_lat = float(cur_data.lat)
-        cur_lon = float(cur_data.lon)
-        log_data = LogData(
-            lat=cur_lat,
-            lon=cur_lon,
-            acc_x=0,
-            acc_y=0,
-            acc_z=0,
-            logged_at=cur_data.logged_at,
-            user=cur_data.user,
-        )
-        # log_dict = {
-        #     'logged_at': cur_data.logged_at,
-        #     'lat': cur_lat,
-        #     'lon': cur_lon,
-        # }
-        acc_sum = cur_data.get_acc_size()
-
-        count = 1
-        next_data = all_log_data[cur + count]
-        next_lat = float(next_data.lat)
-        next_lon = float(next_data.lon)
-        while cur + count < len(all_log_data) - 1 and cur_lat == next_lat and cur_lon == next_lon:
-            acc_sum += next_data.get_acc_size()
-            count += 1
-            next_data = all_log_data[cur + count]
-            next_lat = float(next_data.lat)
-            next_lon = float(next_data.lon)
-        cur += count + 1
-        log_data.acc = acc_sum / count
-        # log_dict['acc'] = acc_sum / count
-        # data_ary.append(log_dict)
-        log_data.save()
-        created_count += 1
-
-    return JsonResponse({'created': created_count, }, safe=False)
-
-@login_required
-def bump_sensing_register(request):
-    # logger.debug('POST = %s' % request.POST)
-    logs = json.loads(request.POST['log_json_str'])['logs']
-    logger.debug('logs = %s' % logs)
-
-    if logs is not None:
-        user = User.objects.get(username=request.user)
-        logger.debug('user = %s' % user)
-
-        for count, log in enumerate(logs, start=1):
-            logger.debug('#%d log = %s' % (count, log))
-            logged_at = datetime.datetime.fromtimestamp(log['logged_at'])
-            # logger.debug('logged_at = %s' % logged_at)
-            log_data = LogData(
-                lat=log['lat'],
-                lon=log['lon'],
-                acc_x=log['acc_x'],
-                acc_y=log['acc_y'],
-                acc_z=log['acc_z'],
-                logged_at=logged_at,
-                user=user,
-            )
-            logger.debug('log_data = %s' % log_data)
-            log_data.save()
-
-        return JsonResponse({'count': count})
-    else:
-        raise Http404
+    return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request))
 
 @login_required
 def bump_chart(request):
