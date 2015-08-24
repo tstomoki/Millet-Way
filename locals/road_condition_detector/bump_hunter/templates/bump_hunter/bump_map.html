@@ -43,6 +43,8 @@ var RED_DOT_ICON_PATH = '/static/image/small_dots/small-red-dot.png';
 var BLUE_DOT_ICON_PATH = '/static/image/small_dots/small-blue-dot.png';
 var YELLOW_DOT_ICON_PATH = '/static/image/small_dots/small-yellow-dot.png';
 
+var mode = '{{ mode }}';
+
 $(document).ready(function(){
     var map = new GMaps({
         div: '#bump-map',
@@ -108,6 +110,9 @@ $(document).ready(function(){
     $.ajax({
         url: '../get_all/',
         type: 'GET',
+        data: {
+          mode: mode
+        },
         dataType: 'json',
         success: function(response) {
           for (var i = 0; i < response.markers.length; i++) {
@@ -158,7 +163,11 @@ $(document).ready(function(){
     });
 
     // navbar
-    $('#nav_map').addClass('active');
+    if (mode == 'Roadway') {
+        $('#nav_roadway').addClass('active');
+    } else if (mode == 'Sidewalk') {
+        $('#nav_sidewalk').addClass('active');
+    }
 });
 </script>
 <script>
