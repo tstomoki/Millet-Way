@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container-fluid">
-  <h3 class="page-header"><img src="/static/image/{{ mode }}-icon.png" style="width: 50px; margin-right: 30px;">Bump Sensing for {{ mode }}</h3>
+  <h3 class="page-header"><img src="{{ STATIC_URL }}image/{{ mode }}-icon.png" style="width: 50px; margin-right: 30px;">Bump Sensing for {{ mode }}</h3>
   <div>
     <h4>Status</h4>
     <p><span id="status"></span></p>
