@@ -147,8 +147,7 @@ $(document).ready(function(){
                         // alert('clicked action');
                     },
                     infoWindow: {
-                        // content: '<p>user: ' + data.username + '</p><p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
-                        content: 'lat: ' + data.lat + '<br>lng:' + data.lon + '<br>acc: ' + data.acc.toFixed(3) + ' m/s^2<br><a href="/bump_hunter/bump_insights/?mode=' + mode + '&lat=' + data.lat + '&lon=' + data.lon + '">Create your insight</a>',
+                        content: 'user: ' + data.user_name + '<br>lat: ' + data.lat + '<br>lng:' + data.lon + '<br>acc: ' + data.acc.toFixed(3) + ' m/s^2<br><a href="/bump_hunter/bump_insights/?mode=' + mode + '&lat=' + data.lat + '&lon=' + data.lon + '">Create your insight</a>',
                     },
                     icon: icon_path,
                 });

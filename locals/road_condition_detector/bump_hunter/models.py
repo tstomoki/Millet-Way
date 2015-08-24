@@ -10,6 +10,7 @@ MAP_TYPES = [('roadway', 'Roadway'),
 
 class LogData(models.Model):
     user       = models.ForeignKey(User)
+    user_name  = models.CharField(max_length=200, default='')
     lat        = models.DecimalField(max_digits=12, decimal_places=9)
     lon        = models.DecimalField(max_digits=12, decimal_places=9)
     acc        = models.DecimalField(max_digits=7, decimal_places=3)

@@ -126,13 +126,12 @@ def bump_map_get_all(request):
     data_ary       = []
 
     for log_data in all_log_data:
-        # username = log_data.user.username
         log_dict = {
             'logged_at': log_data.logged_at,
             'lat': float(log_data.lat),
             'lon': float(log_data.lon),
             'acc': float(log_data.acc),
-            # 'username': username,
+            'user_name': log_data.user_name,
         }
 
         data_ary.append(log_dict)
@@ -141,16 +140,18 @@ def bump_map_get_all(request):
 
 @login_required
 def bump_sensing_roadway(request):
-    do_subscribe('Roadway')
+    user_name = request.user.username
+    do_subscribe(user_name, 'Roadway')
     return render_to_response('bump_hunter/bump_sensing.html', { 'mode': 'Roadway' }, context_instance=RequestContext(request))
 
 @login_required
 def bump_sensing_sidewalk(request):
-    do_subscribe('Sidewalk')
+    user_name = request.user.username
+    do_subscribe(user_name, 'Sidewalk')
     return render_to_response('bump_hunter/bump_sensing.html', { 'mode': 'Sidewalk' }, context_instance=RequestContext(request))
 
 # for saving data from mqtt connection
-def do_subscribe(mode):
+def do_subscribe(user_name, mode):
     mqtt_options = {
         'org': ORG_ID,
         'id': str(uuid.uuid4()),
@@ -180,6 +181,7 @@ def do_subscribe(mode):
             logged_at = datetime.datetime.fromtimestamp(log['logged_at'])
 
             log_data = LogData(
+                user_name=user_name,
                 lat=log['lat'],
                 lon=log['lon'],
                 acc=log['acc'],
