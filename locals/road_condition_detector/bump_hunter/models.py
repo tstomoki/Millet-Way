@@ -35,7 +35,7 @@ class UserInsight(models.Model):
     insight_type = models.CharField(max_length=20, choices=MAP_TYPES, default='Roadway')
     location     = models.CharField(max_length=200)
     comment      = models.CharField(max_length=200)
-    image        = models.FileField(upload_to=get_upload_path, default='')
+    image        = models.FileField(upload_to=get_upload_path, default='', blank=True)
     created_at   = models.DateTimeField(auto_now_add=True)
     updated_at   = models.DateTimeField(auto_now=True)
     def __unicode__(self):
