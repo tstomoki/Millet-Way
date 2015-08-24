@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render, render_to_response, get_object_or_404
+from django.shortcuts import render, render_to_response, get_object_or_404, redirect
 from django import forms
 from django.template import RequestContext
 from django.http import HttpResponse, JsonResponse, Http404
@@ -54,8 +54,7 @@ prev_lon = 0.0
 logger = logging.getLogger(__name__)
 
 def bump_index(request):
-    return render_to_response('bump_hunter/bump_index.html',  # 使用するテンプレート
-                              context_instance=RequestContext(request))  # その他標準のコンテキスト
+    return render_to_response('bump_hunter/bump_index.html', context_instance=RequestContext(request))
 
 @login_required
 def bump_map_roadway(request):
@@ -125,9 +124,6 @@ def bump_map_get_all(request):
     all_log_data = LogData.objects.filter(log_type__icontains=request.GET['mode'])
     # logger.debug('request = %s' % request)
     data_ary       = []
-    pre_label      = None
-    consective_ary = []
-    markers_ary    = []
 
     for log_data in all_log_data:
         # username = log_data.user.username
@@ -139,30 +135,9 @@ def bump_map_get_all(request):
             # 'username': username,
         }
 
-        log_label = 'red' if (log_dict['acc'] > RED_THRESH) else None
-        if (pre_label is not None) or (log_label is not None):
-            if (log_label is not None) and (pre_label is not None):
-                consective_ary.append(log_dict)
-            else:
-                if log_label is not None:
-                    consective_ary.append(log_dict)
-                    pre_label = log_label
-                if (pre_label is not None) and len(consective_ary) > 10:
-                    base_data = consective_ary[len(consective_ary)/2]
-                    acc_list = [_c['acc'] for _c in consective_ary]
-                    markers_dict = {
-                        'lat': base_data['lat'],
-                        'lon': base_data['lon'],
-                        'acc': reduce(lambda x, y: x + y, acc_list) / len(acc_list)
-                    }
-                    markers_ary.append(markers_dict)
-                    pre_label       = None
-                    log_label       = None
-                    consective_ary  = []
-
         data_ary.append(log_dict)
 
-    return JsonResponse({'all_log_data': data_ary, 'markers': markers_ary}, safe=False)
+    return JsonResponse({'all_log_data': data_ary, }, safe=False)
 
 @login_required
 def bump_sensing_roadway(request):
@@ -230,7 +205,17 @@ def bump_chart(request):
 
 @login_required
 def bump_insights(request, id=None):
-    form = UserInsightForm()
+    user_name = request.user.username
+
+    if request.method == "GET" and len(request.GET) > 0:
+        # logger.debug('GET = %s' % request.GET)
+        lat = request.GET['lat'] if (len(request.GET['lat']) > 0) else None
+        lon = request.GET['lon'] if (len(request.GET['lon']) > 0) else None
+        mode = request.GET['mode'] if (len(request.GET['mode']) > 0) else "Roadway"
+        form = UserInsightForm(initial={'user_name': user_name, 'lat': lat, 'lon': lon, 'insight_type': mode.lower()})
+    else:
+        form = UserInsightForm(initial={'user_name': user_name})
+
     hidden_keyword = ""
 
     if request.method == "POST":
@@ -242,6 +227,8 @@ def bump_insights(request, id=None):
                 user_insight = form.save(commit=False)
                 hidden_keyword = user_insight.location
                 user_insight.save()
+                logger.debug('user_insight.insight_type = %s' % user_insight.insight_type)
+                return redirect('/bump_hunter/bump_map/' + user_insight.insight_type + '/')
             else:
                 print form.errors
 
@@ -249,7 +236,11 @@ def bump_insights(request, id=None):
 
 @login_required
 def bump_insights_get_all(request):
-    all_insight_data = UserInsight.objects.all()
+    if len(request.GET) > 0:
+        all_insight_data = UserInsight.objects.filter(insight_type__icontains=request.GET['mode'])
+    else:
+        all_insight_data = UserInsight.objects.all()
+
     data_ary = []
     for cur_data in all_insight_data:
         insight_dict = {
