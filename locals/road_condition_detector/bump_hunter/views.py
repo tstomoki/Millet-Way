@@ -46,6 +46,10 @@ AUTH_METHOD = 'apikey'
 API_KEY = 'a-g6t2bu-0lsj9vg8gt'
 API_TOKEN = 'YKLe&MtjSvd*FbXYpM'
 
+prev_lat = 0.0
+prev_lon = 0.0
+
+# log
 logger = logging.getLogger(__name__)
 
 def bump_index(request):
@@ -72,7 +76,7 @@ def bump_map_get_tweets(request):
     if response.status_code == requests.codes.ok:
         LT_result_data = json.loads(response.text)
         LT_str = LT_result_data['translations'][0]['translation']
-        update_str = "%s (%s)" % (LT_str, timestamp)    
+        update_str = "%s (%s)" % (LT_str, timestamp)
     return JsonResponse({'all_log_data': data_ary, 'markers': markers_ary}, safe=False)
 
 # tweet method
@@ -116,34 +120,20 @@ def bump_map_get_all(request):
     all_log_data = LogData.objects.all()
     # logger.debug('all_log_data = %s' % all_log_data)
     data_ary       = []
-    cur            = 0
-    next           = 1
     pre_label      = None
     consective_ary = []
     markers_ary    = []
-    while cur < len(all_log_data) - 1:
-        cur_data = all_log_data[cur]
-        cur_lat = float(cur_data.lat)
-        cur_lon = float(cur_data.lon)
-        log_dict = {
-            'logged_at': cur_data.logged_at,
-            'lat': cur_lat,
-            'lon': cur_lon,
-        }
-        acc_sum = cur_data.get_acc_size()
 
-        count = 1
-        next_data = all_log_data[cur + count]
-        next_lat = float(next_data.lat)
-        next_lon = float(next_data.lon)
-        while cur + count < len(all_log_data) - 1 and cur_lat == next_lat and cur_lon == next_lon:
-            acc_sum += next_data.get_acc_size()
-            count += 1
-            next_data = all_log_data[cur + count]
-            next_lat = float(next_data.lat)
-            next_lon = float(next_data.lon)
-        cur += count + 1
-        log_dict['acc'] = acc_sum / count
+    for log_data in all_log_data:
+        # username = log_data.user.username
+        log_dict = {
+            'logged_at': log_data.logged_at,
+            'lat': float(log_data.lat),
+            'lon': float(log_data.lon),
+            'acc': float(log_data.acc),
+            # 'username': username,
+        }
+
         log_label = 'red' if (log_dict['acc'] > RED_THRESH) else None
         if (pre_label is not None) or (log_label is not None):
             if (log_label is not None) and (pre_label is not None):
@@ -164,24 +154,13 @@ def bump_map_get_all(request):
                     pre_label       = None
                     log_label       = None
                     consective_ary  = []
+
         data_ary.append(log_dict)
-    # for log_data in all_log_data:
-    #     log_dict = {}
-    #     log_dict['lat'] = float(log_data.lat)
-    #     log_dict['lon'] = float(log_data.lon)
-    #     log_dict['logged_at'] = log_data.logged_at
-    #     log_dict['acc'] = math.sqrt(math.pow(log_data.acc_x, 2) + math.sqrt(log_data.acc_y, 2) + math.pow(log_data.acc_z, 2))
-    #     # log_dict['user'] = unicode(log_data.user)
-    #     # logger.debug('log_data.user = %s' % log_data.user)
-    #     data_ary.append(log_dict)
+
     return JsonResponse({'all_log_data': data_ary, 'markers': markers_ary}, safe=False)
 
 @login_required
 def bump_sensing(request):
-    return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request))
-
-@login_required
-def bump_mqtt(request):
     mqtt_options = {
         'org': ORG_ID,
         'id': str(uuid.uuid4()),
@@ -190,25 +169,36 @@ def bump_mqtt(request):
         'auth-token': API_TOKEN,
     }
 
+    # prev_lat = 0
+    # prev_lon = 0
+
     def myEventCallback(event):
+        global prev_lat, prev_lon
+
         log = event.data
         logger.debug('log = %s' % log)
-        user = User.objects.get(pk=log['user_id'])
-        logger.debug('user = %s' % user)
-        logged_at = datetime.datetime.fromtimestamp(log['logged_at'])
 
-        log_data = LogData(
-            lat=log['lat'],
-            lon=log['lon'],
-            acc_x=log['acc_x'],
-            acc_y=log['acc_y'],
-            acc_z=log['acc_z'],
-            logged_at=logged_at,
-            user=user,
-        )
-        logger.debug('log_data = %s' % log_data)
+        logger.debug('prev_lat = %f' % prev_lat)
+        logger.debug('prev_lon = %f' % prev_lon)
 
-        log_data.save()
+        if not (prev_lat == log['lat'] and prev_lon == log['lon']):
+            prev_lat = log['lat']
+            prev_lon = log['lon']
+
+            user = User.objects.get(pk=log['user_id'])
+            logger.debug('user = %s' % user)
+            logged_at = datetime.datetime.fromtimestamp(log['logged_at'])
+
+            log_data = LogData(
+                lat=log['lat'],
+                lon=log['lon'],
+                acc=log['acc'],
+                logged_at=logged_at,
+                user=user,
+            )
+            logger.debug('log_data = %s' % log_data)
+
+            log_data.save()
 
     try:
         client = ibmiotf.application.Client(mqtt_options)
@@ -217,37 +207,7 @@ def bump_mqtt(request):
         client.subscribeToDeviceEvents(DEVICE_TYPE, DEVICE_ID, "+")
     except ibmiotf.ConnectionException as e:
         logger.error('Connection failed: %s' % e)
-    return render_to_response('bump_hunter/bump_mqtt.html', context_instance=RequestContext(request))
-
-@login_required
-def bump_sensing_register(request):
-    # logger.debug('POST = %s' % request.POST)
-    logs = json.loads(request.POST['log_json_str'])['logs']
-    logger.debug('logs = %s' % logs)
-
-    if logs is not None:
-        user = User.objects.get(username=request.user)
-        logger.debug('user = %s' % user)
-
-        for count, log in enumerate(logs, start=1):
-            logger.debug('#%d log = %s' % (count, log))
-            logged_at = datetime.datetime.fromtimestamp(log['logged_at'])
-            # logger.debug('logged_at = %s' % logged_at)
-            log_data = LogData(
-                lat=log['lat'],
-                lon=log['lon'],
-                acc_x=log['acc_x'],
-                acc_y=log['acc_y'],
-                acc_z=log['acc_z'],
-                logged_at=logged_at,
-                user=user,
-            )
-            logger.debug('log_data = %s' % log_data)
-            log_data.save()
-
-        return JsonResponse({'count': count})
-    else:
-        raise Http404
+    return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request))
 
 @login_required
 def bump_chart(request):
@@ -269,7 +229,7 @@ def bump_insights(request, id=None):
                 user_insight.save()
             else:
                 print form.errors
-    
+
     return render_to_response('bump_hunter/bump_insights.html', {'form':form, 'hidden_keyword': hidden_keyword}, context_instance=RequestContext(request))
 
 @login_required
@@ -303,7 +263,7 @@ def bump_insights_get_tweets(request):
     negative_response = requests.get(url, params={"q": negative_query, "size": tweets_size}, headers=headers)
 
     p_tweets = []
-    n_tweets = []    
+    n_tweets = []
     if positive_response.status_code == requests.codes.ok:
         positive_text = json.loads(positive_response.text)
         for p_data in positive_text['tweets']:
@@ -325,8 +285,8 @@ def bump_insights_get_tweets(request):
                               'img_url':  target_data['actor']['image'],
                               'body_text': target_data['body']
                           }
-                n_tweets.append(tweet_data)        
-    return JsonResponse({'positive_tweets': p_tweets, 'negative_tweets': n_tweets}, safe=False)    
+                n_tweets.append(tweet_data)
+    return JsonResponse({'positive_tweets': p_tweets, 'negative_tweets': n_tweets}, safe=False)
 
 def logout(request):
     logout(request)

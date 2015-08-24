@@ -6,6 +6,8 @@
 <div class="container-fluid">
   <h3 class="page-header">Bump Sensing</h3>
   <div>
+    <h4>Status</h4>
+    <p><span id="status"></span></p>
     <h4>Acceleration</h4>
     <p>X: <span id="acc_x"></span> m/s^2</p>
     <p>Y: <span id="acc_y"></span> m/s^2</p>
@@ -16,37 +18,37 @@
     <p>Lat: <span id="lat"></span></p>
     <p>Lon: <span id="lon"></span></p>
   </div>
-  <button id="register_btn" type="button" class="btn btn-default btn-block">Register Data</button>
 </div>
+<script src="/static/js/mqttws31.js"></script>
 <script>
-var MAX_LOG_DATA = 5000;
+var ORG_ID = 'g6t2bu';
+var CLIENT_ID = 'd:g6t2bu:MQTTDevice:DQGM50ADF8GJ';
+var PASSWORD = ')l3k_j(h(tR4penx3g';
 
-// DEBUG
-// var logs = [
-//     {
-//         logged_at: 1439543510.385,
-//         lat: 35.8915585,
-//         lon: 139.9550587,
-//         acc_x: 0.1,
-//         acc_y: 0.2,
-//         acc_z: 0.3,
-//     },
-//     {
-//         logged_at: 1439543607.692,
-//         lat: 35.891550099999996,
-//         lon: 139.9549973,
-//         acc_x: -0.1,
-//         acc_y: 0.2,
-//         acc_z: -0.3,
-//     },
-// ];
-var logs = [];
-var lat = 0.0;
-var lon = 0.0;
+var connected = false;
+var ax = [], ay = [], az = [];
+var lat = 0, lon = 0;
+var topic = "iot-2/evt/sensorData/fmt/json-iotf";
 
 $(function() {
+    // mqtt
+    client = new Paho.MQTT.Client(ORG_ID + '.messaging.internetofthings.ibmcloud.com', 1883, CLIENT_ID);
+    connectDevice(client);
+
     // acceleration
-    window.addEventListener('devicemotion', collectAcceleration);
+    window.ondevicemotion = function(e) {
+        var cur_ax = parseFloat(e.acceleration.x || 0);
+        var cur_ay = parseFloat(e.acceleration.y || 0);
+        var cur_az = parseFloat(e.acceleration.z || 0);
+        $('#acc_x').text(cur_ax);
+        $('#acc_y').text(cur_ay);
+        $('#acc_z').text(cur_az);
+        if (!(cur_ax == 0 && cur_ay == 0 && cur_az == 0)) {
+            ax.push(cur_ax);
+            ay.push(cur_ay);
+            az.push(cur_az);
+        }
+    };
 
     // location
     if (navigator.geolocation) {
@@ -56,10 +58,15 @@ $(function() {
             timeout: 5000
         };
         navigator.geolocation.watchPosition(function(pos) {
-            lat = pos.coords.latitude;
-            lon = pos.coords.longitude;
-            $('#lat').text(lat);
-            $('#lon').text(lon);
+            var cur_lat = pos.coords.latitude;
+            var cur_lon = pos.coords.longitude;
+            if (!(cur_lat == lat && cur_lon == lon)) {
+                lat = cur_lat;
+                lon = cur_lon;
+                $('#lat').text(lat);
+                $('#lon').text(lon);
+                publish();
+            }
         }, function(err) {
             console.warn('ERROR(' + err.code + '): ' + err.message);
         }, options);
@@ -67,58 +74,85 @@ $(function() {
         alert("Geolocation API is not supported.");
     }
 
-    // registeration
-    $('#register_btn').click(function() {
-        window.removeEventListener('devicemotion', collectAcceleration);
-
-        var json_str = JSON.stringify({logs: logs});
-        console.log(json_str);
-
-        $.ajax({
-            url: 'register/',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                log_json_str: json_str,
-            },
-            success: function(response) {
-                alert('Your log data (total = ' + response.count + ') were registered.');
-                console.log(response);
-            },
-        });
-    });
-
     // navbar
     $('#nav_sensing').addClass('active');
 });
 
-var collectAcceleration = function(e) {
-    var time = new Date().getTime() / 1000.0;
+var connectDevice = function(client) {
+    $('#status').text('Connecting...');
 
-    var ax = e.acceleration.x;
-    var ay = e.acceleration.y;
-    var az = e.acceleration.z;
-    $('#acc_x').text(ax);
-    $('#acc_y').text(ay);
-    $('#acc_z').text(az);
+    client.connect({
+        onSuccess: onConnectSuccess,
+        onFailure: onConnectFailure,
+        userName: 'use-token-auth',
+        password: PASSWORD,
+    });
+};
 
-    if (lat !== 0.0 || lon !== 0.0) {
-        var data = {
-            logged_at: time,
-            lat: lat,
-            lon: lon,
-            acc_x: ax,
-            acc_y: ay,
-            acc_z: az,
+var publish = function() {
+    if (connected) {
+        if (ax.length == 0 || ay.length == 0 || az.length == 0 || lat == 0 || lon == 0) {
+            return;
+        }
+
+        var time = new Date().getTime() / 1000.0;
+        var raw_ax = ax.concat();
+        var raw_ay = ay.concat();
+        var raw_az = az.concat();
+        ax = [], ay = [], az = [];
+
+        var ave_acc = calcAverageAcc(raw_ax, raw_ay, raw_az);
+
+        var payload = {
+            'd': {
+                'acc': ave_acc.toFixed(3),
+                'lat': lat,
+                'lon': lon,
+                'logged_at': time,
+                'user_id': {{ user.id }},
+            }
         };
 
-        logs.push(data);
+        var message = new Paho.MQTT.Message(JSON.stringify(payload));
+        message.destinationName = topic;
+        try {
+            client.send(message);
+            console.log('[%s] Published', new Date().getTime());
+        } catch (err) {
+            connected = false;
+            $('#status').text('Disconnected');
+            setTimeout(connectDevice(client), 1000);
+        }
+    }
+};
+
+var onConnectSuccess = function() {
+    // The device connected successfully
+    console.log("Connected Successfully!");
+    connected = true;
+    $('#status').text('Connected');
+};
+
+var onConnectFailure = function() {
+    // The device failed to connect. Let's try again in one second.
+    console.log("Could not connect to IoT Foundation! Trying again in one second.");
+    setTimeout(connectDevice(client), 1000);
+};
+
+var calcAverageAcc = function(acc_x, acc_y, acc_z) {
+    var min_count = acc_x.length;
+    if (acc_y.length < min_count) {
+        min_count = acc_y.length;
+    }
+    if (acc_z.length < min_count) {
+        min_count = acc_z.length;
     }
 
-    if (logs.length > MAX_LOG_DATA) {
-        window.removeEventListener('devicemotion', collectAcceleration);
-        alert(MAX_LOG_DATA + ' logs were collected. Stop collection.');
+    var ave = 0;
+    for (var i = 0; i < min_count; i++) {
+        ave += Math.sqrt(Math.pow(acc_x[i], 2) + Math.pow(acc_y[i], 2) + Math.pow(acc_z[i], 2));
     }
+    return ave / min_count;
 };
 
 </script>

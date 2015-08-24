@@ -11,7 +11,7 @@ from bump_hunter.models import UserInsight
 # admin.site.register(User, UserAdmin)
 
 class LogDataAdmin(admin.ModelAdmin):
-    list_display = ('id', 'lat', 'lon', 'acc_x', 'acc_y', 'acc_z', 'created_at', 'updated_at',)
+    list_display = ('id', 'lat', 'lon', 'acc', 'created_at', 'updated_at',)
 admin.site.register(LogData, LogDataAdmin)
 
 class UserInsightAdmin(admin.ModelAdmin):

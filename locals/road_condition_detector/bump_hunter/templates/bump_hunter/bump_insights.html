@@ -13,28 +13,28 @@
 
   <div class="row">
     <div class="col-md-6">
-      <h3 class="page-header">Bump Insights<br><span class="text-muted">You can register your insight here</span></h3>      
+      <h3 class="page-header">Bump Insights<br><span class="text-muted">You can register your insight here</span></h3>
       <form class="form-horizontal" method="POST">
         {% csrf_token %}
         <div class="form-group">
           <label for="inputEmail3" class="col-sm-2 control-label">Latitude</label>
           <div class="col-sm-5">
-            {{ form.lat}}      
+            {{ form.lat}}
           </div>
         </div>
         <div class="form-group">
           <label for="inputEmail3" class="col-sm-2 control-label">Longitude</label>
           <div class="col-sm-5">
-            {{ form.lon}}      
+            {{ form.lon}}
           </div>
           <div class="col-sm-5" style="margin-top: -30px;">
             <a id="geolocate-link" class="btn btn-md btn-primary" href="#" onclick="GeoLocate();" role="button">Get your current location</a>
-          </div>          
+          </div>
         </div>
         <div class="form-group">
           <label for="inputEmail3" class="col-sm-2 control-label">User name</label>
           <div class="col-sm-10">
-            {{ form.user_name}}      
+            {{ form.user_name}}
           </div>
         </div>
         <div class="form-group">
@@ -44,30 +44,30 @@
           </div>
           <div class="col-sm-4" style="margin-top: 5px;">
             <a id="geocode-link" class="btn btn-md btn-primary" href="#" onclick="GeoCode();" role="button" style="width: 100%;">Geocoding</a>
-          </div>          
+          </div>
         </div>
-          
+
         <div class="form-group">
           <label for="inputEmail3" class="col-sm-2 control-label">Comment</label>
           <div class="col-sm-10">
-            {{ form.comment}}      
+            {{ form.comment}}
           </div>
-        </div>        
-        
-        <div class="col-sm-offset-2 col-sm-10">
-          <input type="submit" class="btn-lg btn-info">      
         </div>
-      </form>      
+
+        <div class="col-sm-offset-2 col-sm-10">
+          <input type="submit" class="btn-lg btn-info">
+        </div>
+      </form>
     </div>
     <div class="col-md-6">
       <div id="bump-map"></div>
     </div>
     <h3 class="page-header">Bump Insights of others<br><span class="text-muted">Other users are talking about the location.  <span style="font-weight: bold;">{{ hidden_keyword }}</span></span></h3>
-    <div class="col-md-6">    
+    <div class="col-md-6">
       <h4 class="page-header"><span class="text-muted"><span style="color: Red;">Positive Tweets</span> around the location</span></h4>
       <div id="positive-tweets-container"></div>
     </div>
-    <div class="col-md-6">      
+    <div class="col-md-6">
       <h4 class="page-header"><span class="text-muted"><span style="color: Blue;">Negative Tweets</span> around the location</span></h4>
       <div id="negative-tweets-container"></div>
     </div>
@@ -78,7 +78,7 @@
 <script language="javascript" type="text/javascript">
  var map;
  var BLUE_ICON_PATH = '/static/image/blue-dot.png';
- var YELLOW_ICON_PATH = '/static/image/yellow-dot.png';  
+ var YELLOW_ICON_PATH = '/static/image/yellow-dot.png';
  $(document).ready(function(){
    map = new GMaps({
      div: '#bump-map',
@@ -104,8 +104,8 @@
               },
               icon: YELLOW_ICON_PATH,
             });
-          }    
-          map.addLayer('traffic');              
+          }
+          map.addLayer('traffic');
         }
    });
    // display twitter
@@ -125,10 +125,13 @@
        for (var i = 0; i < response.negative_tweets.length; i++) {
          var n_tweet = response.negative_tweets[i]
          var insert_html =  '<table style="margin-top: 15px;"><tr><td valign="top" rowspan="3" style="padding: 10px;"><img class="i4twitter_image" src="' + n_tweet.img_url + '"></td><td width="100%"><span>' + n_tweet.user_name + '</span><span>' + n_tweet.at_name + '</span></td></tr><tr><td><div style="border-bottom:1px solid silver;">' + n_tweet.body_text + '</div></td></tr><tr><td>IBM Insights Twitter</td></tr></table>'
-         $("#negative-tweets-container").append(insert_html);         
-       }       
+         $("#negative-tweets-container").append(insert_html);
+       }
      }
-   });      
+   });
+
+   // navbar
+    $('#nav_insights').addClass('active');
  });
  function GeoLocate() {
    var default_str     = $("#geolocate-link").text();
@@ -143,7 +146,7 @@
          lat: position.coords.latitude,
          lng: position.coords.longitude,
          icon: BLUE_ICON_PATH,
-       });                
+       });
      },
      error: function(error) {
        alert('Geolocation failed: '+error.message);
@@ -155,7 +158,7 @@
        target_ele.text(default_str);
        alert("Your current location is coorded!");
      }
-   });     
+   });
  }
  function GeoCode() {
    var default_str     = $("#geocode-link").text();
@@ -179,9 +182,9 @@
          target_ele.text(default_str);
          alert("Geocoding was failed...");
        }
-       target_ele.text(default_str);       
+       target_ele.text(default_str);
      }
    });
- } 
+ }
 </script>
 {% endblock content %}
