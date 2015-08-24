@@ -172,7 +172,7 @@ def bump_sensing_roadway(request):
 @login_required
 def bump_sensing_sidewalk(request):
     do_subscribe('Sidewalk')
-    return render_to_response('bump_hunter/bump_sensing.html', { 'mode': 'Roadway' }, context_instance=RequestContext(request))
+    return render_to_response('bump_hunter/bump_sensing.html', { 'mode': 'Sidewalk' }, context_instance=RequestContext(request))
 
 # for saving data from mqtt connection
 def do_subscribe(mode):
@@ -300,7 +300,7 @@ def bump_insights_get_tweets(request):
         for n_data in negative_text['tweets']:
             if n_data.has_key('message'):
                 target_data = n_data['message']
-                date_reg    = reg_format.search(target_data['postedTime'])                
+                date_reg    = reg_format.search(target_data['postedTime'])
                 tweet_data  = {'user_name': target_data['actor']['displayName'],
                                'at_name': target_data['actor']['preferredUsername'],
                                'img_url':  target_data['actor']['image'],
