@@ -32,13 +32,13 @@
     </div>
   </div>
 </div>
-
 <script>
 var RED_THRESH = 2.0;
 var YELLOW_THRESH = 1.0;
 var RED_ICON_PATH = '/static/image/red-dot.png';
 var YELLOW_ICON_PATH = '/static/image/yellow-dot.png';
 var BLUE_ICON_PATH = '/static/image/blue-dot.png';
+var GREEN_ICON_PATH = '/static/image/green-dot.png';
 var RED_DOT_ICON_PATH = '/static/image/small_dots/small-red-dot.png';
 var BLUE_DOT_ICON_PATH = '/static/image/small_dots/small-blue-dot.png';
 var YELLOW_DOT_ICON_PATH = '/static/image/small_dots/small-yellow-dot.png';
@@ -63,6 +63,20 @@ $(document).ready(function(){
         },
         always: function() {
         }
+    });
+    GMaps.on('click', map.map, function(event) {
+        var lat = event.latLng.lat();
+        var lng = event.latLng.lng();
+        var content = 'lat: ' + lat + '<br>lng: ' + lng + '<br><a href="/bump_hunter/bump_insights/?mode=' + mode + '&lat=' + lat + '&lon=' + lng + '">Create your insight</a>';
+
+        map.addMarker({
+            lat: lat,
+            lng: lng,
+            // title: 'Marker #' + index,
+            infoWindow: {
+                content : content
+            }
+        });
     });
 
     // geocoding
@@ -134,13 +148,41 @@ $(document).ready(function(){
                     },
                     infoWindow: {
                         // content: '<p>user: ' + data.username + '</p><p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
-                        content: '<p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p><p><a href="#"></a></p>',
+                        content: 'lat: ' + data.lat + '<br>lng:' + data.lon + '<br>acc: ' + data.acc.toFixed(3) + ' m/s^2<br><a href="/bump_hunter/bump_insights/?mode=' + mode + '&lat=' + data.lat + '&lon=' + data.lon + '">Create your insight</a>',
                     },
                     icon: icon_path,
                 });
                 map.addLayer('traffic');
             }
         },
+    });
+
+    // visualization of insights data
+    $.ajax({
+        url: '/bump_hunter/bump_insights/get_all/',
+        type: 'GET',
+        data: {
+            mode: mode,
+        },
+        dataType: 'json',
+        success: function(response) {
+            for (var i = 0; i < response.all_insight_data.length; i++) {
+                var data = response.all_insight_data[i];
+                // var icon_path = (data.insight_type == 'roadway') ? GREEN_ICON_PATH : YELLOW_ICON_PATH
+                var icon_path = GREEN_ICON_PATH;
+                // console.log(data);
+                map.addMarker({
+                    lat: data.lat,
+                    lng: data.lon,
+                    title: data.created_at,
+                    infoWindow: {
+                    content: '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Location: </td><td>' + data.location_name + '</td><tr><td style="font-weight: bold; min-width: 100px;">User Name: </td><td>' + data.user_name + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">Comment</td><td>' + data.comment + '</td></tr></table><div style="margin: 10px;"><a href="http://maps.google.com/?cbll=' + data.lat + ',' + data.lon + '&layer=c" target="_blank">Street View Link</a></div>'
+                    },
+                    icon: icon_path,
+                });
+            }
+            map.addLayer('traffic');
+        }
     });
 
     // navbar

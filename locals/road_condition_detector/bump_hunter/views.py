@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render, render_to_response, get_object_or_404
+from django.shortcuts import render, render_to_response, get_object_or_404, redirect
 from django import forms
 from django.template import RequestContext
 from django.http import HttpResponse, JsonResponse, Http404
@@ -205,7 +205,17 @@ def bump_chart(request):
 
 @login_required
 def bump_insights(request, id=None):
-    form = UserInsightForm()
+    user_name = request.user.username
+
+    if request.method == "GET" and len(request.GET) > 0:
+        # logger.debug('GET = %s' % request.GET)
+        lat = request.GET['lat'] if (len(request.GET['lat']) > 0) else None
+        lon = request.GET['lon'] if (len(request.GET['lon']) > 0) else None
+        mode = request.GET['mode'] if (len(request.GET['mode']) > 0) else "Roadway"
+        form = UserInsightForm(initial={'user_name': user_name, 'lat': lat, 'lon': lon, 'insight_type': mode.lower()})
+    else:
+        form = UserInsightForm(initial={'user_name': user_name})
+
     hidden_keyword = ""
 
     if request.method == "POST":
@@ -217,6 +227,8 @@ def bump_insights(request, id=None):
                 user_insight = form.save(commit=False)
                 hidden_keyword = user_insight.location
                 user_insight.save()
+                logger.debug('user_insight.insight_type = %s' % user_insight.insight_type)
+                return redirect('/bump_hunter/bump_map/' + user_insight.insight_type + '/')
             else:
                 print form.errors
 
@@ -224,7 +236,11 @@ def bump_insights(request, id=None):
 
 @login_required
 def bump_insights_get_all(request):
-    all_insight_data = UserInsight.objects.all()
+    if len(request.GET) > 0:
+        all_insight_data = UserInsight.objects.filter(insight_type__icontains=request.GET['mode'])
+    else:
+        all_insight_data = UserInsight.objects.all()
+
     data_ary = []
     for cur_data in all_insight_data:
         insight_dict = {
