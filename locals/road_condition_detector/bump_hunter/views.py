@@ -58,9 +58,12 @@ def bump_index(request):
                               context_instance=RequestContext(request))  # その他標準のコンテキスト
 
 @login_required
-def bump_map(request):
-    return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート
-                              context_instance=RequestContext(request))  # その他標準のコンテキスト
+def bump_map_roadway(request):
+    return render_to_response('bump_hunter/bump_map.html', { 'mode': 'Roadway' }, context_instance=RequestContext(request))
+
+@login_required
+def bump_map_sidewalk(request):
+    return render_to_response('bump_hunter/bump_map.html', { 'mode': 'Sidewalk' }, context_instance=RequestContext(request))
 
 # twitter insights
 @login_required
@@ -118,8 +121,9 @@ def bump_tweet(request):
 
 @login_required
 def bump_map_get_all(request):
-    all_log_data = LogData.objects.all()
-    # logger.debug('all_log_data = %s' % all_log_data)
+    # logger.debug('mode = %s' % request.GET['mode'])
+    all_log_data = LogData.objects.filter(log_type__icontains=request.GET['mode'])
+    # logger.debug('request = %s' % request)
     data_ary       = []
     pre_label      = None
     consective_ary = []
@@ -161,7 +165,17 @@ def bump_map_get_all(request):
     return JsonResponse({'all_log_data': data_ary, 'markers': markers_ary}, safe=False)
 
 @login_required
-def bump_sensing(request):
+def bump_sensing_roadway(request):
+    do_subscribe('Roadway')
+    return render_to_response('bump_hunter/bump_sensing.html', { 'mode': 'Roadway' }, context_instance=RequestContext(request))
+
+@login_required
+def bump_sensing_sidewalk(request):
+    do_subscribe('Sidewalk')
+    return render_to_response('bump_hunter/bump_sensing.html', { 'mode': 'Roadway' }, context_instance=RequestContext(request))
+
+# for saving data from mqtt connection
+def do_subscribe(mode):
     mqtt_options = {
         'org': ORG_ID,
         'id': str(uuid.uuid4()),
@@ -194,6 +208,7 @@ def bump_sensing(request):
                 lat=log['lat'],
                 lon=log['lon'],
                 acc=log['acc'],
+                log_type=mode,
                 logged_at=logged_at,
                 user=user,
             )
@@ -208,7 +223,6 @@ def bump_sensing(request):
         client.subscribeToDeviceEvents(DEVICE_TYPE, DEVICE_ID, "+")
     except ibmiotf.ConnectionException as e:
         logger.error('Connection failed: %s' % e)
-    return render_to_response('bump_hunter/bump_sensing.html', context_instance=RequestContext(request))
 
 @login_required
 def bump_chart(request):
