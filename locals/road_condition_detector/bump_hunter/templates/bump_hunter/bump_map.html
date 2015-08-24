@@ -170,12 +170,18 @@ $(document).ready(function(){
                 // var icon_path = (data.insight_type == 'roadway') ? GREEN_ICON_PATH : YELLOW_ICON_PATH
                 var icon_path = GREEN_ICON_PATH;
                 // console.log(data);
+                var content = '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Location: </td><td>' + data.location_name + '</td><tr><td style="font-weight: bold; min-width: 100px;">User Name: </td><td>' + data.user_name + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">Comment</td><td>' + data.comment + '</td></tr></table><div style="margin: 10px;">';
+                if (data.image_url) {
+                    content += '<img src="' + data.image_url + '" style="width: 300px; height 200px;"/ ></div><div style="margin: 10px;"><a href="http://maps.google.com/?cbll=' + data.lat + ',' + data.lon + '&layer=c" target="_blank">Street View Link</a></div>';
+                } else {
+                    content += '<a href="http://maps.google.com/?cbll=' + data.lat + ',' + data.lon + '&layer=c" target="_blank">Street View Link</a></div>';
+                }
                 map.addMarker({
                     lat: data.lat,
                     lng: data.lon,
                     title: data.created_at,
                     infoWindow: {
-                    content: '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Location: </td><td>' + data.location_name + '</td><tr><td style="font-weight: bold; min-width: 100px;">User Name: </td><td>' + data.user_name + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">Comment</td><td>' + data.comment + '</td></tr></table><div style="margin: 10px;"><img src="' + data.image_url + '" style="width: 300px; height 200px;"/ ></div><div style="margin: 10px;"><a href="http://maps.google.com/?cbll=' + data.lat + ',' + data.lon + '&layer=c" target="_blank">Street View Link</a></div>'
+                        content: content,
                     },
                     icon: icon_path,
                 });

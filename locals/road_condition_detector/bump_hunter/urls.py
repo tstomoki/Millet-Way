@@ -7,8 +7,8 @@ from django.conf import settings
 
 urlpatterns = patterns('',
     (r'^$', lambda r: HttpResponseRedirect('bump_index/')),
-    (r'^bump_map/$', lambda r: HttpResponseRedirect('/bump_hunter/bump_index/')),
-    (r'^bump_sensing/$', lambda r: HttpResponseRedirect('/bump_hunter/bump_index/')),
+    (r'^bump_map/$', lambda r: HttpResponseRedirect('/bump_hunter/bump_map/roadway/')),
+    (r'^bump_sensing/$', lambda r: HttpResponseRedirect('/bump_hunter/bump_map/roadway/')),
     url(r'^bump_index/$', views.bump_index, name='bump_index'),
     url(r'^bump_map/roadway/$', views.bump_map_roadway, name='bump_map_roadway'),
     url(r'^bump_map/sidewalk/$', views.bump_map_sidewalk, name='bump_map_sidewalk'),
