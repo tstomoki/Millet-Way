@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Bump Map{% endblock title %}
+{% block title %}Bump Map for {{ mode }}{% endblock title %}
 
 {% block content %}
 <div class="container-fluid">
   <div>
-    <h3 class="page-header"><img src="{{ STATIC_URL }}image/main.png"/ style="width: 50px; margin-right: 30px;">Bump Map</h3>
+    <h3 class="page-header"><img src="/static/image/{{ mode }}-icon.png" style="width: 50px; margin-right: 30px;">Bump Map for {{ mode }}</h3>
   </div>
   <div class="row">
     <div class="col-md-8">
@@ -61,7 +61,7 @@ $(document).ready(function(){
     },
     always: function() {
     }
-  });  
+  });
 
     // geocoding
     GMaps.geocode({
@@ -102,11 +102,11 @@ $(document).ready(function(){
     dataType: 'json',
     success: function(response) {
     }
-  });    
-  
+  });
+
     // visualization of log data
     $.ajax({
-        url: 'get_all/',
+        url: '../get_all/',
         type: 'GET',
         dataType: 'json',
         success: function(response) {
@@ -127,8 +127,8 @@ $(document).ready(function(){
                     infoWindow: {
                       content: '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Averaged Acc: </td><td>' + data.acc.toFixed(3) + '[m/s^2]</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr></table><div style="margin: 10px;"><a href="http://maps.google.com/?cbll=' + data.lat + ',' + data.lon + '&layer=c" target="_blank"><img src="{{ STATIC_URL }}image/dummy_images/dummy' + image_index + '.png" style="width: 300px; height 200px;"/ ></a></div>'
                     },
-                });            
-            }          
+                });
+            }
             for (var i = 0; i < response.all_log_data.length; i++) {
                 var data = response.all_log_data[i];
                 // console.log(data);
@@ -152,7 +152,7 @@ $(document).ready(function(){
                     },
                     icon: icon_path,
                 });
-              map.addLayer('traffic');              
+              map.addLayer('traffic');
             }
         },
     });

@@ -6,8 +6,10 @@ from django.http import HttpResponseRedirect
 
 urlpatterns = patterns('',
     (r'^$', lambda r: HttpResponseRedirect('bump_index/')),
+    (r'^bump_map/$', lambda r: HttpResponseRedirect('/bump_hunter/bump_index/')),
     url(r'^bump_index/$', views.bump_index, name='bump_index'),
-    url(r'^bump_map/$', views.bump_map, name='bump_map'),
+    url(r'^bump_map/roadway/$', views.bump_map_roadway, name='bump_map_roadway'),
+    url(r'^bump_map/sidewalk/$', views.bump_map_sidewalk, name='bump_map_sidewalk'),
     url(r'^bump_tweet/$', views.bump_tweet, name='bump_tweet'),
     url(r'^bump_map/get_all/$', views.bump_map_get_all, name='bump_map_get_all'),
     url(r'^bump_map/get_tweets/$', views.bump_map_get_tweets, name='bump_map_get_tweets'),

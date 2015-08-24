@@ -58,9 +58,12 @@ def bump_index(request):
                               context_instance=RequestContext(request))  # その他標準のコンテキスト
 
 @login_required
-def bump_map(request):
-    return render_to_response('bump_hunter/bump_map.html',  # 使用するテンプレート
-                              context_instance=RequestContext(request))  # その他標準のコンテキスト
+def bump_map_roadway(request):
+    return render_to_response('bump_hunter/bump_map.html', { 'mode': 'Roadway' }, context_instance=RequestContext(request))
+
+@login_required
+def bump_map_sidewalk(request):
+    return render_to_response('bump_hunter/bump_map.html', { 'mode': 'Sidewalk' }, context_instance=RequestContext(request))
 
 # twitter insights
 @login_required
