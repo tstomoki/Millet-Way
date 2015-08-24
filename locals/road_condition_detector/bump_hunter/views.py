@@ -54,8 +54,7 @@ prev_lon = 0.0
 logger = logging.getLogger(__name__)
 
 def bump_index(request):
-    return render_to_response('bump_hunter/bump_index.html',  # 使用するテンプレート
-                              context_instance=RequestContext(request))  # その他標準のコンテキスト
+    return render_to_response('bump_hunter/bump_index.html', context_instance=RequestContext(request))
 
 @login_required
 def bump_map_roadway(request):
@@ -125,9 +124,6 @@ def bump_map_get_all(request):
     all_log_data = LogData.objects.filter(log_type__icontains=request.GET['mode'])
     # logger.debug('request = %s' % request)
     data_ary       = []
-    pre_label      = None
-    consective_ary = []
-    markers_ary    = []
 
     for log_data in all_log_data:
         # username = log_data.user.username
@@ -139,30 +135,9 @@ def bump_map_get_all(request):
             # 'username': username,
         }
 
-        log_label = 'red' if (log_dict['acc'] > RED_THRESH) else None
-        if (pre_label is not None) or (log_label is not None):
-            if (log_label is not None) and (pre_label is not None):
-                consective_ary.append(log_dict)
-            else:
-                if log_label is not None:
-                    consective_ary.append(log_dict)
-                    pre_label = log_label
-                if (pre_label is not None) and len(consective_ary) > 10:
-                    base_data = consective_ary[len(consective_ary)/2]
-                    acc_list = [_c['acc'] for _c in consective_ary]
-                    markers_dict = {
-                        'lat': base_data['lat'],
-                        'lon': base_data['lon'],
-                        'acc': reduce(lambda x, y: x + y, acc_list) / len(acc_list)
-                    }
-                    markers_ary.append(markers_dict)
-                    pre_label       = None
-                    log_label       = None
-                    consective_ary  = []
-
         data_ary.append(log_dict)
 
-    return JsonResponse({'all_log_data': data_ary, 'markers': markers_ary}, safe=False)
+    return JsonResponse({'all_log_data': data_ary, }, safe=False)
 
 @login_required
 def bump_sensing_roadway(request):

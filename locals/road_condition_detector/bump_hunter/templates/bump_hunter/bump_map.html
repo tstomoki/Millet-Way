@@ -51,19 +51,19 @@ $(document).ready(function(){
         lat: 35.90061,
         lng: 139.933694
     });
-  GMaps.geolocate({
-    success: function(position) {
-      map.setCenter(position.coords.latitude, position.coords.longitude);
-    },
-    error: function(error) {
-      alert('Geolocation failed: '+error.message);
-    },
-    not_supported: function() {
-      alert("Your browser does not support geolocation");
-    },
-    always: function() {
-    }
-  });
+    GMaps.geolocate({
+        success: function(position) {
+            map.setCenter(position.coords.latitude, position.coords.longitude);
+        },
+        error: function(error) {
+            alert('Geolocation failed: '+error.message);
+        },
+        not_supported: function() {
+            alert("Your browser does not support geolocation");
+        },
+        always: function() {
+        }
+    });
 
     // geocoding
     GMaps.geocode({
@@ -83,57 +83,38 @@ $(document).ready(function(){
         e.preventDefault();
         GMaps.geocode({
             address: $('#address').val().trim(),
-            callback: function(results, status){
-                if(status=='OK'){
+            callback: function(results, status) {
+                if (status=='OK') {
                     var latlng = results[0].geometry.location;
                     map.setCenter(latlng.lat(), latlng.lng());
                     map.addMarker({
-                      lat: latlng.lat(),
-                      lng: latlng.lng(),
-                      icon: BLUE_ICON_PATH,
+                        lat: latlng.lat(),
+                        lng: latlng.lng(),
+                        icon: BLUE_ICON_PATH,
                     });
                 }
             }
         });
     });
 
-  // twitter insights
-  $.ajax({
-    url: '/bump_hunter/bump_tweet/',
-    type: 'GET',
-    dataType: 'json',
-    success: function(response) {
-    }
-  });
+    // twitter insights
+    $.ajax({
+        url: '/bump_hunter/bump_tweet/',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+        }
+    });
 
     // visualization of log data
     $.ajax({
         url: '../get_all/',
         type: 'GET',
         data: {
-          mode: mode
+            mode: mode
         },
         dataType: 'json',
         success: function(response) {
-          for (var i = 0; i < response.markers.length; i++) {
-            var data = response.markers[i];
-            var image_index = i;
-            if (i > 3){
-              image_index = 3;
-              }
-                // console.log(data);
-                map.addMarker({
-                    lat: data.lat,
-                    lng: data.lon,
-                    title: data.logged_at,
-                    click: function(e) {
-                        // alert('clicked action');
-                    },
-                    infoWindow: {
-                      content: '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Averaged Acc: </td><td>' + data.acc.toFixed(3) + '[m/s^2]</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr></table><div style="margin: 10px;"><a href="http://maps.google.com/?cbll=' + data.lat + ',' + data.lon + '&layer=c" target="_blank"><img src="{{ STATIC_URL }}image/dummy_images/dummy' + image_index + '.png" style="width: 300px; height 200px;"/ ></a></div>'
-                    },
-                });
-            }
             for (var i = 0; i < response.all_log_data.length; i++) {
                 var data = response.all_log_data[i];
                 // console.log(data);
@@ -152,12 +133,12 @@ $(document).ready(function(){
                         // alert('clicked action');
                     },
                     infoWindow: {
-                        // content: '<p>user: ' + data.user + '</p><p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
-                        content: '<p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
+                        // content: '<p>user: ' + data.username + '</p><p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p>',
+                        content: '<p>acc: ' + data.acc.toFixed(3) + ' m/s^2</p><p><a href="#"></a></p>',
                     },
                     icon: icon_path,
                 });
-              map.addLayer('traffic');
+                map.addLayer('traffic');
             }
         },
     });
