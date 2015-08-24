@@ -87,6 +87,7 @@
 <script language="javascript" type="text/javascript">
  var map;
  var BLUE_ICON_PATH = '/static/image/blue-dot.png';
+ var GREEN_ICON_PATH = '/static/image/green-dot.png';
  var YELLOW_ICON_PATH = '/static/image/yellow-dot.png';
  $(document).ready(function(){
    map = new GMaps({
@@ -103,15 +104,16 @@
         success: function(response) {
           for (var i = 0; i < response.all_insight_data.length; i++) {
             var data = response.all_insight_data[i];
+            var icon_path = (data.insight_type == 'roadway') ? GREEN_ICON_PATH : YELLOW_ICON_PATH
             // console.log(data);
             map.addMarker({
               lat: data.lat,
               lng: data.lon,
               title: data.created_at,
               infoWindow: {
-                content: '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Location: </td><td>' + data.location_name + '</td><tr><td style="font-weight: bold; min-width: 100px;">User Name: </td><td>' + data.user_name + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">Comment</td><td>' + data.comment + '</td></tr></table><div style="margin: 10px;"><a href="http://maps.google.com/?cbll=' + data.lat + ',' + data.lon + '&layer=c" target="_blank">Street View Link</a></div>'
+                content: '<table style="text-align: center;"><tr><td style="font-weight: bold; min-width: 100px;">Location: </td><td>' + data.location_name + '</td><tr><td style="font-weight: bold; min-width: 100px;">User Name: </td><td>' + data.user_name + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">latitude: </td><td>' + data.lat + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">longitude: </td><td>' + data.lon + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">Type</td><td>' + data.insight_type + '</td></tr><tr><td style="font-weight: bold; min-width: 100px;">Comment</td><td>' + data.comment + '</td></tr></table><div style="margin: 10px;"><a href="http://maps.google.com/?cbll=' + data.lat + ',' + data.lon + '&layer=c" target="_blank">Street View Link</a></div>'
               },
-              icon: YELLOW_ICON_PATH,
+              icon: icon_path,
             });
           }
           map.addLayer('traffic');
@@ -159,13 +161,15 @@
      },
      error: function(error) {
        alert('Geolocation failed: '+error.message);
+       target_ele.text(default_str);
      },
      not_supported: function() {
        alert("Your browser does not support geolocation");
+       target_ele.text(default_str);
      },
      always: function() {
-       target_ele.text(default_str);
        alert("Your current location is coorded!");
+       target_ele.text(default_str);
      }
    });
  }

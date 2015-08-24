@@ -15,6 +15,6 @@ class LogDataAdmin(admin.ModelAdmin):
 admin.site.register(LogData, LogDataAdmin)
 
 class UserInsightAdmin(admin.ModelAdmin):
-    list_display = ('id', 'lat', 'lon', 'user_name', 'location', 'comment', 'created_at', 'updated_at',)
+    list_display = ('id', 'lat', 'lon', 'user_name', 'insight_type', 'location', 'comment', 'created_at', 'updated_at',)
 admin.site.register(UserInsight, UserInsightAdmin)
 

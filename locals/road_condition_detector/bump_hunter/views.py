@@ -242,6 +242,7 @@ def bump_insights_get_all(request):
             'lat': float(cur_data.lat),
             'lon': float(cur_data.lon),
             'user_name': cur_data.user_name,
+            'insight_type': cur_data.insight_type,
             'location_name': cur_data.location,
             'comment': cur_data.comment,
             'created_at': cur_data.created_at
