@@ -91,6 +91,9 @@
     </div>
   </div>
   <div id="hidden-keyword" style="display: none;">{{ hidden_keyword }}</div>
+  <div id="hidden-coord-lat" style="display: none;">{{ default_lat }}</div>
+  <div id="hidden-coord-lon" style="display: none;">{{ default_lon }}</div>
+  <div id="marker-flag" style="display: none;">{{ marker_flag }}</div>
 </div>
 
 <script language="javascript" type="text/javascript">
@@ -102,10 +105,16 @@
    map = new GMaps({
      div: '#bump-map',
      zoom: 12,
-     lat: 35.681382,
-     lng: 139.766083999
+     lat: Number($("#hidden-coord-lat").text()),
+     lng: Number($("#hidden-coord-lon").text())
    });
-   // visualization of insights data
+   if ($("#marker-flag").text() == "True"){
+     map.addMarker({
+       lat: Number($("#hidden-coord-lat").text()),
+       lng: Number($("#hidden-coord-lon").text()),
+     })
+   }
+    // visualization of insights data
    $.ajax({
         url: 'get_all/',
         type: 'GET',

@@ -208,11 +208,23 @@ def bump_chart(request):
 @login_required
 def bump_insights(request, id=None):
     user_name = request.user.username
+    lat = None
+    lon = None
+    default_lat = 35.681382
+    default_lon = 139.766083999
+    marker_flag = False
 
     if request.method == "GET" and len(request.GET) > 0:
         # logger.debug('GET = %s' % request.GET)
-        lat = request.GET['lat'] if (len(request.GET['lat']) > 0) else None
-        lon = request.GET['lon'] if (len(request.GET['lon']) > 0) else None
+        if (len(request.GET['lat']) > 0):
+            lat = request.GET['lat']
+            default_lat = request.GET['lat']
+        if (len(request.GET['lon']) > 0):
+            lon = request.GET['lon']
+            default_lon = request.GET['lon']
+        if (default_lat is not None) and (default_lon is not None):
+            marker_flag = True
+            
         mode = request.GET['mode'] if (len(request.GET['mode']) > 0) else "Roadway"
         form = UserInsightForm(initial={'user_name': user_name, 'lat': lat, 'lon': lon, 'insight_type': mode.lower()})
     else:
@@ -239,7 +251,13 @@ def bump_insights(request, id=None):
             else:
                 logger.error(form.errors)
 
-    return render_to_response('bump_hunter/bump_insights.html', {'form':form, 'hidden_keyword': hidden_keyword}, context_instance=RequestContext(request))
+    return render_to_response('bump_hunter/bump_insights.html',
+                              {'form':form,
+                               'hidden_keyword': hidden_keyword,
+                               'default_lat': default_lat,
+                               'default_lon': default_lon,
+                               'marker_flag': marker_flag},
+                              context_instance=RequestContext(request))
 
 @login_required
 def bump_insights_get_all(request):
