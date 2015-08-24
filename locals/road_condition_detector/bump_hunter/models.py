@@ -1,12 +1,19 @@
+from django import forms
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ModelForm
 from django.forms import Textarea
-from django.forms.widgets import TextInput, Select
+from django.forms.widgets import TextInput, Select, FileInput
 import math
+import uuid
+import os
 
 MAP_TYPES = [('roadway', 'Roadway'),
                  ('sidewalk', 'Sidewalk')]
+
+def get_upload_path(instance, filename):
+    root, ext = os.path.splitext(filename)
+    return 'media/images/%s%s' % (uuid.uuid4().hex, ext)
 
 class LogData(models.Model):
     user       = models.ForeignKey(User)
@@ -28,6 +35,7 @@ class UserInsight(models.Model):
     insight_type = models.CharField(max_length=20, choices=MAP_TYPES, default='Roadway')
     location     = models.CharField(max_length=200)
     comment      = models.CharField(max_length=200)
+    image        = models.FileField(upload_to=get_upload_path, default='')
     created_at   = models.DateTimeField(auto_now_add=True)
     updated_at   = models.DateTimeField(auto_now=True)
     def __unicode__(self):
@@ -65,5 +73,8 @@ class UserInsightForm(ModelForm):
                 'cols': 80,
                 'rows': 20,
                 'placeholder': 'There are too many bumps around this point!!!'
+            }),
+            'image': FileInput(attrs={
+                'class': 'form-control',
             }),
         }

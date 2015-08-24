@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Bump Chart{% endblock title %}
+{% block title %}Bump Insights{% endblock title %}
 
 {% block content %}
 <div class="container-fluid">
@@ -16,7 +16,7 @@
       <h3 class="page-header">Bump Insights<br><span class="text-muted">You can register your insight here</span></h3>
     </div>
     <div class="col-md-6">
-      <form class="form-horizontal" method="POST">
+      <form class="form-horizontal" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group">
           <label for="inputEmail3" class="col-sm-2 control-label">Latitude</label>
@@ -63,6 +63,11 @@
           <div class="col-sm-10">
             {{ form.comment}}
           </div>
+        </div>
+
+        <div>
+          <label for="inputEmail3" class="col-sm-2 control-label">Image File</label>
+          <div class="col-sm-10">{{ form.image }}</div>
         </div>
 
         <div class="col-sm-offset-2 col-sm-10">

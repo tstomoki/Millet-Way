@@ -132,6 +132,11 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
+# Uploaded files
+
+MEDIA_ROOT = BASE_DIR
+MEDIA_URL = '/media/'
+
 # Authentification
 
 LOGIN_URL='/bump_hunter/login'

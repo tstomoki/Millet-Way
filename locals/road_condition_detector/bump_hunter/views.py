@@ -224,15 +224,20 @@ def bump_insights(request, id=None):
         if id is not None:
             instance = get_object_or_404(UserInsight, id=id)
         else:
-            form         = UserInsightForm(request.POST)
+            if len(request.FILES) > 0:
+                form = UserInsightForm(request.POST, request.FILES)
+            else:
+                form = UserInsightForm(request.POST)
+            logger.debug('POST = %s' % request.POST)
+            logger.debug('FILES = %s' % request.FILES)
             if form.is_valid():
                 user_insight = form.save(commit=False)
                 hidden_keyword = user_insight.location
                 user_insight.save()
-                logger.debug('user_insight.insight_type = %s' % user_insight.insight_type)
+                # handle_uploaded_file(request.FILES['file'])
                 return redirect('/bump_hunter/bump_map/' + user_insight.insight_type + '/')
             else:
-                print form.errors
+                logger.error(form.errors)
 
     return render_to_response('bump_hunter/bump_insights.html', {'form':form, 'hidden_keyword': hidden_keyword}, context_instance=RequestContext(request))
 
@@ -252,7 +257,8 @@ def bump_insights_get_all(request):
             'insight_type': cur_data.insight_type,
             'location_name': cur_data.location,
             'comment': cur_data.comment,
-            'created_at': cur_data.created_at
+            'created_at': cur_data.created_at,
+            'image_url': cur_data.image.url
         }
         data_ary.append(insight_dict)
     return JsonResponse({'all_insight_data': data_ary}, safe=False)

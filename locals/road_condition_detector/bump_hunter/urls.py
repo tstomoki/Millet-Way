@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, static
 import django.contrib.auth.views
 from bump_hunter import views
 from django.http import HttpResponseRedirect
+from django.conf import settings
 
 urlpatterns = patterns('',
     (r'^$', lambda r: HttpResponseRedirect('bump_index/')),

@@ -14,9 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 from django.conf.urls import patterns, include, url
+from django.conf.urls.static import static
 from django.contrib import admin
+from django.conf import settings
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^bump_hunter/', include('bump_hunter.urls', namespace='bump_hunter')),    
-]
+    url(r'^bump_hunter/', include('bump_hunter.urls', namespace='bump_hunter')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
