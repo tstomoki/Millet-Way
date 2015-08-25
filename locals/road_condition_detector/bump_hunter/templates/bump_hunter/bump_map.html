@@ -31,6 +31,25 @@
       </a>
     </div>
   </div>
+  <div class="col-md-12">
+    <h3 class="page-header">
+      Bump Insights of others<br><span class="text-muted">Other users are talking about the location.</span>
+    </h3>
+    <form id="bump_tweet_form" class="form-inline" method="post">
+      <div class="form-group">
+        <input type="text" class="form-control" id="search_query" placeholder="Tokyo station">
+      </div>
+      <button type="submit" id="tweets_search_button" class="btn btn-primary">Search Tweets</button>
+    </form>    
+  </div>
+  <div class="col-md-6">
+    <h4 class="page-header"><span class="text-muted"><span style="color: Red;">Positive Tweets</span> around the location</span></h4>
+    <div id="positive-tweets-container"></div>
+  </div>
+  <div class="col-md-6">
+    <h4 class="page-header"><span class="text-muted"><span style="color: Blue;">Negative Tweets</span> around the location</span></h4>
+    <div id="negative-tweets-container"></div>
+  </div>  
 </div>
 <script>
 var RED_THRESH = 2.0;
@@ -119,6 +138,36 @@ $(document).ready(function(){
         success: function(response) {
         }
     });
+
+  // display twitter
+  $('#bump_tweet_form').submit(function(e){
+    e.preventDefault();
+    var search_query = $('#search_query').val().trim();
+    var default_str  = $("#tweets_search_button").text();
+    var target_ele   = $("#tweets_search_button");
+    target_ele.text('Now Searching...');
+    $.ajax({
+      url: '/bump_hunter/bump_insights/get_tweets/',
+      type: 'GET',
+      dataType: 'json',
+      data: { query: search_query},
+      success: function(response) {
+        // Positive
+        for (var i = 0; i < response.positive_tweets.length; i++) {
+          var p_tweet = response.positive_tweets[i]
+          var insert_html =  '<table style="margin-top: 15px;"><tr><td valign="top" rowspan="3" style="padding: 10px;"><img class="i4twitter_image" src="' + p_tweet.img_url + '"></td><td width="100%"><span>' + p_tweet.user_name + '</span><span>' + p_tweet.at_name + '</span></td></tr><tr><td><div style="border-bottom:1px solid silver;">' + p_tweet.body_text + '</span></div></td></tr><tr><td>IBM Insights Twitter<span class="text-muted" style="float:right;font-size:small;">' + p_tweet.posted_at + '</span></td></tr></table>'
+          $("#positive-tweets-container").append(insert_html);
+        }
+        // Negative
+        for (var i = 0; i < response.negative_tweets.length; i++) {
+          var n_tweet = response.negative_tweets[i]
+          var insert_html =  '<table style="margin-top: 15px;"><tr><td valign="top" rowspan="3" style="padding: 10px;"><img class="i4twitter_image" src="' + n_tweet.img_url + '"></td><td width="100%"><span>' + n_tweet.user_name + '</span><span>' + n_tweet.at_name + '</span></td></tr><tr><td><div style="border-bottom:1px solid silver;">' + n_tweet.body_text + '</span></div></td></tr><tr><td>IBM Insights Twitter<span class="text-muted" style="float:right;font-size:small;">' + n_tweet.posted_at + '</span></td></tr></table>'
+          $("#negative-tweets-container").append(insert_html);
+        }
+        $("#tweets_search_button").text("Search Tweets");
+      }
+    })
+  });
 
     // visualization of log data
     $.ajax({
