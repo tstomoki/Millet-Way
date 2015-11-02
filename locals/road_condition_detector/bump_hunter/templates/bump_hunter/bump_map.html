@@ -152,6 +152,11 @@ $(document).ready(function(){
       dataType: 'json',
       data: { query: search_query},
       success: function(response) {
+        if (response.status_code == 403){
+          insert_html = '<p style="font-size: medium; font-weight: bold;">Free Plan reached limitation of Twitter Insights API</p>';
+          $("#positive-tweets-container").append(insert_html);
+          $("#negative-tweets-container").append(insert_html);
+        }        
         // Positive
         for (var i = 0; i < response.positive_tweets.length; i++) {
           var p_tweet = response.positive_tweets[i]

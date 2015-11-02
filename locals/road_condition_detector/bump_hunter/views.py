@@ -19,6 +19,7 @@ import math
 import ibmiotf.application
 import uuid
 import re
+from pdb import *
 
 # Authentication Information for @bumps_hunter
 ## https://twitter.com/bumps_hunter
@@ -121,7 +122,7 @@ def bump_tweet(request):
 @login_required
 def bump_map_get_all(request):
     # logger.debug('mode = %s' % request.GET['mode'])
-    all_log_data = LogData.objects.filter(log_type__icontains=request.GET['mode'])
+    all_log_data = LogData.objects.all()
     # logger.debug('request = %s' % request)
     data_ary       = []
 
@@ -207,12 +208,13 @@ def bump_chart(request):
 
 @login_required
 def bump_insights(request, id=None):
-    user_name = request.user.username
-    lat = None
-    lon = None
-    default_lat = 35.681382
-    default_lon = 139.766083999
-    marker_flag = False
+    user_name      = request.user.username
+    lat            = None
+    lon            = None
+    default_lat    = 35.681382
+    default_lon    = 139.766083999
+    marker_flag    = False
+    hidden_keyword = ''
 
     if request.method == "GET" and len(request.GET) > 0:
         # logger.debug('GET = %s' % request.GET)
@@ -229,8 +231,6 @@ def bump_insights(request, id=None):
         form = UserInsightForm(initial={'user_name': user_name, 'lat': lat, 'lon': lon, 'insight_type': mode.lower()})
     else:
         form = UserInsightForm(initial={'user_name': user_name})
-
-    hidden_keyword = ""
 
     if request.method == "POST":
         if id is not None:
@@ -265,7 +265,6 @@ def bump_insights_get_all(request):
         all_insight_data = UserInsight.objects.filter(insight_type__icontains=request.GET['mode'])
     else:
         all_insight_data = UserInsight.objects.all()
-
     data_ary = []
     for cur_data in all_insight_data:
         insight_dict = {
@@ -286,6 +285,7 @@ def bump_insights_get_all(request):
 def bump_insights_get_tweets(request):
     # use searched query
     query = request.GET['query'] if (len(request.GET['query']) > 0) else "Tokyo Station"
+
     # use TI api
     url            = "%s/messages/search" % TI_URL
     headers        = {'Content-type': 'application/json', 'Accept': 'application/json'}
@@ -328,7 +328,7 @@ def bump_insights_get_tweets(request):
                            }
                 n_tweets.append(tweet_data)
         n_tweets.reverse()
-    return JsonResponse({'positive_tweets': p_tweets, 'negative_tweets': n_tweets}, safe=False)
+    return JsonResponse({'positive_tweets': p_tweets, 'negative_tweets': n_tweets, 'status_code': positive_response.status_code}, safe=False)
 
 def logout(request):
     logout(request)
